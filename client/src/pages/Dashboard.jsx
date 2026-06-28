@@ -8,6 +8,7 @@ import {
   TrendingUp,
   Sparkles,
   Swords,
+  BrainCircuit,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -159,7 +160,7 @@ export default function Dashboard() {
             initial={{ width: 0 }}
             animate={{ width: `${(completedCount / 3) * 100}%` }}
             transition={{ delay: 0.8, duration: 0.8, ease: "easeOut" }}
-            className="h-full rounded-full bg-gradient-to-r from-accent to-amber-400"
+            className="h-full rounded-full bg-linear-to-r from-accent to-amber-400"
           />
         </div>
         <div className="flex justify-between mt-3">
@@ -186,12 +187,11 @@ export default function Dashboard() {
         </div>
       </motion.div>
 
-      {/* Quick Actions */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.7, duration: 0.5 }}
-        className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+        className="grid grid-cols-1 sm:grid-cols-3 gap-4"
       >
         <motion.button
           whileHover={{ scale: 1.02 }}
@@ -208,6 +208,25 @@ export default function Dashboard() {
             </div>
             <div className="text-xs text-text-secondary mt-0.5">
               View and solve your daily problems
+            </div>
+          </div>
+        </motion.button>
+
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => navigate("/ai")}
+          className="glass-card p-6 flex items-center gap-4 group cursor-pointer text-left hover:border-medium/20 transition-colors"
+        >
+          <div className="w-12 h-12 rounded-xl bg-medium/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <BrainCircuit className="w-6 h-6 text-medium" />
+          </div>
+          <div>
+            <div className="text-sm font-semibold text-text-primary group-hover:text-medium transition-colors">
+              AI Study Tools
+            </div>
+            <div className="text-xs text-text-secondary mt-0.5">
+              Hints, explanations, tutor & code review
             </div>
           </div>
         </motion.button>

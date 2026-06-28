@@ -6,6 +6,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import DailyChallenges from "./pages/DailyChallenges";
+import AIFeatures from "./pages/AIFeatures";
 import Profile from "./pages/Profile";
 
 function ProtectedRoute({ children }) {
@@ -68,6 +69,7 @@ export default function App() {
         >
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/challenges" element={<DailyChallenges />} />
+          <Route path="/ai" element={<AIFeatures />} />
           <Route path="/profile" element={<Profile />} />
         </Route>
 

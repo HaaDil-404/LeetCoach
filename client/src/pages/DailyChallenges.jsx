@@ -52,7 +52,7 @@ function ProblemCard({ problem, difficulty, isCompleted, onMarkComplete, isMarki
     >
       {/* Difficulty gradient strip */}
       <div
-        className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${config.gradient}`}
+        className={`absolute top-0 left-0 right-0 h-1 bg-linear-to-r ${config.gradient}`}
       />
 
       <div className="p-6">

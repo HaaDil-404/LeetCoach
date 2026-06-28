@@ -29,12 +29,14 @@ app.get("/", (req, res) => {
     endpoints: {
       auth: "/api/auth",
       challenges: "/api/challenges",
+      ai: "/api/ai",
     },
   });
 });
 
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/challenges", require("./routes/challengeRoutes"));
+app.use("/api/ai", require("./routes/aiRoutes"));
 
 // --------------- Error Handler ---------------
 app.use(errorHandler);

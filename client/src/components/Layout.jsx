@@ -8,6 +8,7 @@ import {
   Code2,
   Menu,
   X,
+  BrainCircuit,
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
@@ -15,6 +16,7 @@ import { useAuth } from "../context/AuthContext";
 const navItems = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/challenges", icon: Swords, label: "Challenges" },
+  { to: "/ai", icon: BrainCircuit, label: "AI Tools" },
   { to: "/profile", icon: User, label: "Profile" },
 ];
 

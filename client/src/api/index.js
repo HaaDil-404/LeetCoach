@@ -43,4 +43,12 @@ export const challengeAPI = {
   markComplete: (problemId) => API.put(`/challenges/complete/${problemId}`),
 };
 
+// ── AI API ──
+export const aiAPI = {
+  getHints: (data) => API.post("/ai/hints", data),
+  explainSolution: (data) => API.post("/ai/explain", data),
+  chat: (data) => API.post("/ai/chat", data),
+  reviewCode: (data) => API.post("/ai/review", data),
+};
+
 export default API;

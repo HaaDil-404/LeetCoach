@@ -104,7 +104,7 @@ export default function Profile() {
         >
           <div className="glass-card p-8 text-center relative overflow-hidden">
             {/* Background gradient */}
-            <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-accent/10 to-transparent" />
+            <div className="absolute top-0 left-0 right-0 h-24 bg-linear-to-b from-accent/10 to-transparent" />
 
             {/* Avatar */}
             <motion.div
@@ -118,7 +118,7 @@ export default function Profile() {
               }}
               className="relative z-10 mb-5"
             >
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-accent to-amber-500 flex items-center justify-center mx-auto shadow-lg shadow-accent/30">
+              <div className="w-20 h-20 rounded-2xl bg-linear-to-br from-accent to-amber-500 flex items-center justify-center mx-auto shadow-lg shadow-accent/30">
                 <span className="text-2xl font-bold text-bg-primary">
                   {initials}
                 </span>
@@ -236,7 +236,7 @@ export default function Profile() {
                       width: `${Math.min(((profile?.currentStreak || 0) / Math.max(profile?.longestStreak || 1, 1)) * 100, 100)}%`,
                     }}
                     transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
-                    className="h-full rounded-full bg-gradient-to-r from-accent to-amber-400"
+                    className="h-full rounded-full bg-linear-to-r from-accent to-amber-400"
                   />
                 </div>
               </div>
@@ -255,7 +255,7 @@ export default function Profile() {
                     initial={{ width: 0 }}
                     animate={{ width: "100%" }}
                     transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
-                    className="h-full rounded-full bg-gradient-to-r from-medium to-yellow-400"
+                    className="h-full rounded-full bg-linear-to-r from-medium to-yellow-400"
                   />
                 </div>
               </div>
@@ -276,7 +276,7 @@ export default function Profile() {
                       width: `${Math.min(((profile?.totalSolved || 0) / 100) * 100, 100)}%`,
                     }}
                     transition={{ delay: 0.7, duration: 0.8, ease: "easeOut" }}
-                    className="h-full rounded-full bg-gradient-to-r from-easy to-emerald-400"
+                    className="h-full rounded-full bg-linear-to-r from-easy to-emerald-400"
                   />
                 </div>
               </div>
@@ -290,7 +290,7 @@ export default function Profile() {
             transition={{ delay: 0.8, duration: 0.5 }}
             className="glass-card-sm p-5 flex items-center gap-4"
           >
-            <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center flex-shrink-0 animate-float">
+            <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0 animate-float">
               <Flame className="w-5 h-5 text-accent" />
             </div>
             <div>
