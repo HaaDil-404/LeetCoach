@@ -49,6 +49,9 @@ export const aiAPI = {
   explainSolution: (data) => API.post("/ai/explain", data),
   chat: (data) => API.post("/ai/chat", data),
   reviewCode: (data) => API.post("/ai/review", data),
+  // RAG endpoints
+  askKnowledgeBase: (data) => API.post("/ai/ask", data),
+  getRAGStatus: () => API.get("/ai/rag-status"),
 };
 
 export default API;

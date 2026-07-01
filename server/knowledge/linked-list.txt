@@ -1,0 +1,212 @@
+LINKED LIST — Complete Study Guide for Coding Interviews
+
+═══════════════════════════════════════════════════════
+CORE CONCEPTS
+═══════════════════════════════════════════════════════
+
+A Linked List is a linear data structure where elements (nodes) are connected via pointers. Unlike arrays, linked list nodes are not stored contiguously in memory.
+
+Node Structure:
+  class Node:
+    val: the data stored
+    next: pointer to the next node (null for last node)
+
+Types:
+- Singly Linked List: Each node points to the next. Traversal in one direction only.
+- Doubly Linked List: Each node has next and prev pointers. Traversal in both directions.
+- Circular Linked List: Last node points back to the first node.
+
+Key Properties:
+- Dynamic size: grows/shrinks as needed
+- Insertion/deletion at known position: O(1) (just update pointers)
+- Random access: O(n) (must traverse from head)
+- No wasted memory from pre-allocation
+
+═══════════════════════════════════════════════════════
+PATTERN 1: TWO POINTERS (FAST/SLOW)
+═══════════════════════════════════════════════════════
+
+Floyd's Cycle Detection (Tortoise and Hare):
+Use slow (1 step) and fast (2 steps) pointers.
+If they meet: cycle exists. If fast reaches null: no cycle.
+
+DETECT CYCLE:
+  slow = fast = head
+  While fast and fast.next:
+    slow = slow.next
+    fast = fast.next.next
+    If slow == fast: return true
+  Return false
+
+FIND CYCLE START:
+After detection, reset one pointer to head. Move both at speed 1. They meet at cycle start.
+  // After slow == fast detected:
+  slow = head
+  While slow != fast:
+    slow = slow.next
+    fast = fast.next
+  Return slow  // start of cycle
+
+FIND MIDDLE NODE:
+When fast reaches end, slow is at the middle.
+  slow = fast = head
+  While fast and fast.next:
+    slow = slow.next
+    fast = fast.next.next
+  Return slow  // middle node (second middle if even length)
+
+LINKED LIST CYCLE LENGTH:
+After detecting cycle (slow == fast), count steps until they meet again.
+
+═══════════════════════════════════════════════════════
+PATTERN 2: REVERSAL
+═══════════════════════════════════════════════════════
+
+REVERSE ENTIRE LIST:
+  prev = null, curr = head
+  While curr:
+    next = curr.next
+    curr.next = prev
+    prev = curr
+    curr = next
+  Return prev  // new head
+
+REVERSE A SUBLIST (from position m to n):
+Traverse to position m-1. Reverse n-m+1 nodes. Reconnect.
+Track the node before the sublist and the first node of the sublist (which becomes the last after reversal).
+
+REVERSE IN K-GROUPS:
+Reverse every k nodes. If remaining nodes < k, leave as-is.
+For each group: reverse k nodes, connect to the previous group's tail.
+Time: O(n), Space: O(1)
+
+PALINDROME LINKED LIST:
+1. Find middle (fast/slow)
+2. Reverse second half
+3. Compare first half with reversed second half
+4. (Optional) Restore the list
+Time: O(n), Space: O(1)
+
+═══════════════════════════════════════════════════════
+PATTERN 3: MERGE / SORT
+═══════════════════════════════════════════════════════
+
+MERGE TWO SORTED LISTS:
+Use a dummy head node. Compare both list heads, append smaller one.
+  dummy = new Node(0)
+  current = dummy
+  While l1 and l2:
+    If l1.val <= l2.val:
+      current.next = l1
+      l1 = l1.next
+    Else:
+      current.next = l2
+      l2 = l2.next
+    current = current.next
+  current.next = l1 or l2  // append remaining
+  Return dummy.next
+
+MERGE K SORTED LISTS:
+Approach 1: Divide and conquer — merge pairs recursively. O(n log k)
+Approach 2: Min-heap — always extract smallest head. O(n log k)
+
+SORT A LINKED LIST:
+Merge sort is ideal for linked lists (no random access needed).
+1. Find middle (fast/slow), split into two halves
+2. Recursively sort each half
+3. Merge the two sorted halves
+Time: O(n log n), Space: O(log n) for recursion stack
+
+═══════════════════════════════════════════════════════
+PATTERN 4: MANIPULATION / REARRANGEMENT
+═══════════════════════════════════════════════════════
+
+REMOVE NTH NODE FROM END:
+Two pointers: advance fast n steps ahead. Then move both. When fast reaches end, slow is at the node to remove.
+Use a dummy node to handle edge case of removing the head.
+Time: O(n), Space: O(1)
+
+ADD TWO NUMBERS:
+Numbers stored in reverse order (LSD first). Add digit by digit with carry.
+  dummy = new Node(0), current = dummy, carry = 0
+  While l1 or l2 or carry:
+    sum = carry + (l1.val if l1 else 0) + (l2.val if l2 else 0)
+    carry = sum / 10
+    current.next = new Node(sum % 10)
+    current = current.next
+    l1 = l1.next if l1 else null
+    l2 = l2.next if l2 else null
+  Return dummy.next
+
+REORDER LIST:
+Transform L0 → L1 → ... → Ln into L0 → Ln → L1 → Ln-1 → ...
+1. Find middle
+2. Reverse second half
+3. Merge alternately
+Time: O(n), Space: O(1)
+
+INTERSECTION OF TWO LINKED LISTS:
+Calculate lengths, advance the longer list by the difference.
+Then advance both until they meet (or reach null).
+Alternative: Two-pass trick — redirect each pointer to the other list's head after reaching null. They'll meet at intersection.
+Time: O(n + m), Space: O(1)
+
+COPY LIST WITH RANDOM POINTER:
+Three-pass approach (O(1) space):
+1. Insert cloned nodes: A→A'→B→B'→C→C'
+2. Set random pointers: clone.random = original.random.next
+3. Separate the two lists
+Or use a hash map: original → clone mapping. O(n) space.
+
+═══════════════════════════════════════════════════════
+SOLUTION TEMPLATES
+═══════════════════════════════════════════════════════
+
+Dummy Head Pattern:
+  dummy = new ListNode(0)
+  dummy.next = head
+  // ... manipulate list ...
+  Return dummy.next
+
+Use dummy head whenever the head node might change (removal, insertion at head).
+
+Remove Nth From End:
+  dummy = new ListNode(0, head)
+  fast = slow = dummy
+  For i from 0 to n: fast = fast.next
+  While fast.next:
+    slow = slow.next
+    fast = fast.next
+  slow.next = slow.next.next
+  Return dummy.next
+
+═══════════════════════════════════════════════════════
+COMPLEXITY ANALYSIS
+═══════════════════════════════════════════════════════
+
+Operation             Singly    Doubly
+───────────────────────────────────────
+Access by index       O(n)      O(n)
+Insert at head        O(1)      O(1)
+Insert at tail        O(n)*     O(1)
+Insert at position    O(n)      O(n)
+Delete at head        O(1)      O(1)
+Delete at position    O(n)      O(1)**
+Search                O(n)      O(n)
+Reverse               O(n)      O(n)
+
+* O(1) if tail pointer maintained
+** O(1) if you have a reference to the node
+
+═══════════════════════════════════════════════════════
+TIPS AND COMMON MISTAKES
+═══════════════════════════════════════════════════════
+
+- ALWAYS use a dummy head node when the head might be modified. It simplifies edge cases enormously.
+- Save next pointer BEFORE modifying links during reversal. curr.next gets overwritten!
+- Draw pictures! Linked list pointer manipulation is error-prone. Sketch the before/after states.
+- When using fast/slow pointers, always check both fast AND fast.next for null (avoid NullPointerException).
+- For problems requiring O(1) space, think about: in-place reversal, two pointers, or modifying the list structure itself.
+- Common off-by-one: make sure you're stopping at the right node (node before the target, not the target itself, for deletion).
+- When merging: always handle the remaining tail of the longer list.
+- Recursive solutions are elegant but use O(n) stack space. Iterative is preferred when O(1) space is required.

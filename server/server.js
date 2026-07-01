@@ -25,7 +25,7 @@ if (process.env.NODE_ENV === "development") {
 app.get("/", (req, res) => {
   res.json({
     message: "🚀 LeetCoach AI API is running",
-    version: "1.0.0",
+    version: "2.0.0",
     endpoints: {
       auth: "/api/auth",
       challenges: "/api/challenges",
@@ -44,8 +44,21 @@ app.use(errorHandler);
 // --------------- Start Server ---------------
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`\n🚀 LeetCoach AI Server running on port ${PORT}`);
   console.log(`   Environment: ${process.env.NODE_ENV}`);
-  console.log(`   http://localhost:${PORT}\n`);
+  console.log(`   http://localhost:${PORT}`);
+
+  // Initialize RAG knowledge base in the background (lazy — non-blocking)
+  try {
+    const { initializeVectorStore } = require("./services/ragService");
+    await initializeVectorStore();
+  } catch (err) {
+    console.warn(
+      `   ⚠️  RAG initialization deferred: ${err.message}`
+    );
+    console.warn(
+      "   RAG will auto-initialize on first /api/ai/ask request.\n"
+    );
+  }
 });

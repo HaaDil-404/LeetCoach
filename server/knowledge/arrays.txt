@@ -1,0 +1,132 @@
+ARRAYS — Complete Study Guide for Coding Interviews
+
+═══════════════════════════════════════════════════════
+CORE CONCEPTS
+═══════════════════════════════════════════════════════
+
+An array is a contiguous block of memory that stores elements of the same type. Arrays provide O(1) random access by index, making them the most fundamental data structure in programming.
+
+Key Properties:
+- Fixed size in most languages (dynamic arrays like JavaScript arrays auto-resize)
+- Zero-indexed (first element at index 0)
+- Contiguous memory allocation enables CPU cache-friendly access
+- Random access: O(1) read/write by index
+- Insertion/deletion at arbitrary positions: O(n) due to shifting
+
+═══════════════════════════════════════════════════════
+ESSENTIAL PATTERNS
+═══════════════════════════════════════════════════════
+
+1. TWO POINTERS
+Use two pointers (left and right) to traverse the array from both ends toward the center, or from the same direction at different speeds.
+Best for: sorted arrays, pair finding, removing duplicates, partitioning.
+Example problems: Two Sum (sorted), Container With Most Water, Remove Duplicates.
+
+2. PREFIX SUM
+Precompute cumulative sums to answer range-sum queries in O(1).
+prefix[i] = arr[0] + arr[1] + ... + arr[i-1]
+Range sum from index l to r = prefix[r+1] - prefix[l]
+Example problems: Subarray Sum Equals K, Range Sum Query, Product of Array Except Self.
+
+3. KADANE'S ALGORITHM
+Find the maximum subarray sum in O(n) time.
+Track currentMax and globalMax. At each element, decide: start a new subarray here, or extend the previous one.
+currentMax = max(nums[i], currentMax + nums[i])
+globalMax = max(globalMax, currentMax)
+Example problems: Maximum Subarray, Maximum Product Subarray.
+
+4. SLIDING WINDOW
+Maintain a window [left, right] that slides across the array. Expand right to include elements, shrink left when constraints are violated.
+Best for: contiguous subarray/substring problems with constraints.
+Example problems: Maximum Sum Subarray of Size K, Minimum Window Substring.
+
+5. SORTING + GREEDY
+Sort the array first, then apply greedy logic.
+Example problems: Merge Intervals, Meeting Rooms, 3Sum.
+
+6. IN-PLACE MANIPULATION
+Modify the array without extra space. Use swap operations, overwrite from the end, or maintain a write pointer.
+Example problems: Move Zeroes, Remove Element, Sort Colors (Dutch National Flag).
+
+═══════════════════════════════════════════════════════
+COMMON PROBLEM TYPES
+═══════════════════════════════════════════════════════
+
+TWO SUM PROBLEM:
+Given an array of integers and a target, find two numbers that add up to target.
+Approach 1 (Hash Map): Iterate once, for each num check if (target - num) exists in the map. O(n) time, O(n) space.
+Approach 2 (Sorted + Two Pointers): Sort first, then use left/right pointers. O(n log n) time, O(1) space.
+
+BEST TIME TO BUY AND SELL STOCK:
+Track the minimum price seen so far. At each price, calculate profit = price - minPrice. Track the maximum profit.
+O(n) time, O(1) space.
+
+PRODUCT OF ARRAY EXCEPT SELF:
+Two-pass approach: first pass computes prefix products (left to right), second pass multiplies by suffix products (right to left).
+O(n) time, O(1) extra space (output array doesn't count).
+
+MERGE INTERVALS:
+Sort intervals by start time. Iterate and merge overlapping intervals (current.end >= next.start).
+O(n log n) time.
+
+ROTATE ARRAY:
+Three reversal approach: reverse entire array, reverse first k elements, reverse remaining elements.
+O(n) time, O(1) space.
+
+═══════════════════════════════════════════════════════
+SOLUTION TEMPLATES
+═══════════════════════════════════════════════════════
+
+Two Sum with Hash Map:
+  Create empty hash map
+  For each index i, num in array:
+    complement = target - num
+    If complement in map:
+      Return [map[complement], i]
+    map[num] = i
+
+Prefix Sum Template:
+  prefix = [0] * (n + 1)
+  For i from 0 to n-1:
+    prefix[i+1] = prefix[i] + nums[i]
+  Range sum (l, r) = prefix[r+1] - prefix[l]
+
+Kadane's Algorithm:
+  currentMax = globalMax = nums[0]
+  For i from 1 to n-1:
+    currentMax = max(nums[i], currentMax + nums[i])
+    globalMax = max(globalMax, currentMax)
+  Return globalMax
+
+═══════════════════════════════════════════════════════
+COMPLEXITY ANALYSIS
+═══════════════════════════════════════════════════════
+
+Operation               Time        Space
+─────────────────────────────────────────────
+Access by index         O(1)        —
+Search (unsorted)       O(n)        —
+Search (sorted)         O(log n)    —
+Insert at end           O(1)*       —
+Insert at beginning     O(n)        —
+Delete at index         O(n)        —
+Two pointers            O(n)        O(1)
+Prefix sum (build)      O(n)        O(n)
+Prefix sum (query)      O(1)        —
+Kadane's algorithm      O(n)        O(1)
+Sorting                 O(n log n)  O(log n)
+
+* Amortized for dynamic arrays
+
+═══════════════════════════════════════════════════════
+TIPS AND COMMON MISTAKES
+═══════════════════════════════════════════════════════
+
+- Always consider edge cases: empty array, single element, all same elements, negative numbers.
+- Watch for off-by-one errors in loop bounds and index calculations.
+- When the problem says "contiguous subarray," think sliding window or prefix sum.
+- When the problem says "sorted array," think binary search or two pointers.
+- If O(n²) is too slow, consider sorting (O(n log n)) or hash maps (O(n)).
+- For "in-place" requirements, think about swapping elements or maintaining a write pointer.
+- Integer overflow can occur with large arrays — use appropriate data types.
+- Consider whether the array is 0-indexed or 1-indexed in the problem statement.

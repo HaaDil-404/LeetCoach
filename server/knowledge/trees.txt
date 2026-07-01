@@ -1,0 +1,230 @@
+TREES — Complete Study Guide for Coding Interviews
+
+═══════════════════════════════════════════════════════
+CORE CONCEPTS
+═══════════════════════════════════════════════════════
+
+A Tree is a hierarchical data structure consisting of nodes connected by edges. It is an acyclic, connected graph with a designated root node.
+
+Key Terminology:
+- Root: The topmost node (no parent)
+- Leaf: A node with no children
+- Depth: Distance from root to a node (root depth = 0)
+- Height: Distance from a node to its deepest leaf descendant
+- Subtree: A node and all its descendants
+- Binary Tree: Each node has at most 2 children (left and right)
+
+Binary Search Tree (BST) Property:
+- Left subtree values < node value
+- Right subtree values > node value
+- Both subtrees are also BSTs
+- In-order traversal yields sorted order
+
+Balanced Trees:
+- AVL Tree: Heights of left and right subtrees differ by at most 1
+- Red-Black Tree: Self-balancing BST used in most language standard libraries
+- B-Tree: Used in databases and file systems
+
+═══════════════════════════════════════════════════════
+PATTERN 1: TREE TRAVERSALS
+═══════════════════════════════════════════════════════
+
+In-Order (Left → Root → Right):
+  function inorder(node):
+    if node is null: return
+    inorder(node.left)
+    process(node)
+    inorder(node.right)
+For BST: produces sorted order.
+
+Pre-Order (Root → Left → Right):
+  function preorder(node):
+    if node is null: return
+    process(node)
+    preorder(node.left)
+    preorder(node.right)
+Used for: serialization, copying trees, prefix expression.
+
+Post-Order (Left → Right → Root):
+  function postorder(node):
+    if node is null: return
+    postorder(node.left)
+    postorder(node.right)
+    process(node)
+Used for: deletion, computing sizes, postfix expression.
+
+Level-Order (BFS):
+  queue = [root]
+  While queue is not empty:
+    levelSize = queue.length
+    For each node in this level:
+      node = queue.dequeue()
+      process(node)
+      if node.left: queue.enqueue(node.left)
+      if node.right: queue.enqueue(node.right)
+
+═══════════════════════════════════════════════════════
+PATTERN 2: DFS RECURSION
+═══════════════════════════════════════════════════════
+
+Most tree problems follow one of these recursive patterns:
+
+TOP-DOWN (Pass info from parent to children):
+  function solve(node, parentInfo):
+    if node is null: return
+    // Use parentInfo to compute something
+    solve(node.left, updatedInfo)
+    solve(node.right, updatedInfo)
+Example: Maximum Depth, Path Sum
+
+BOTTOM-UP (Collect info from children):
+  function solve(node):
+    if node is null: return baseCase
+    leftResult = solve(node.left)
+    rightResult = solve(node.right)
+    return combine(leftResult, rightResult, node)
+Example: Height, Diameter, Balanced check
+
+COMMON DFS PROBLEMS:
+
+MAXIMUM DEPTH:
+  function maxDepth(node):
+    if node is null: return 0
+    return 1 + max(maxDepth(node.left), maxDepth(node.right))
+
+DIAMETER OF BINARY TREE:
+The longest path between any two nodes (may not pass through root).
+  maxDiameter = 0
+  function height(node):
+    if node is null: return 0
+    leftH = height(node.left)
+    rightH = height(node.right)
+    maxDiameter = max(maxDiameter, leftH + rightH)
+    return 1 + max(leftH, rightH)
+
+IS BALANCED:
+  function isBalanced(node):
+    if node is null: return [true, 0]
+    [leftBal, leftH] = isBalanced(node.left)
+    [rightBal, rightH] = isBalanced(node.right)
+    balanced = leftBal and rightBal and abs(leftH - rightH) <= 1
+    return [balanced, 1 + max(leftH, rightH)]
+
+LOWEST COMMON ANCESTOR:
+  function lca(node, p, q):
+    if node is null or node == p or node == q: return node
+    left = lca(node.left, p, q)
+    right = lca(node.right, p, q)
+    if left and right: return node  // p and q are in different subtrees
+    return left or right
+
+PATH SUM:
+  function hasPathSum(node, targetSum):
+    if node is null: return false
+    if node is leaf: return node.val == targetSum
+    return hasPathSum(node.left, targetSum - node.val) or
+           hasPathSum(node.right, targetSum - node.val)
+
+═══════════════════════════════════════════════════════
+PATTERN 3: BST OPERATIONS
+═══════════════════════════════════════════════════════
+
+SEARCH IN BST:
+  if node is null: return null
+  if target == node.val: return node
+  if target < node.val: search left
+  if target > node.val: search right
+Time: O(h) where h = tree height
+
+INSERT INTO BST:
+  if node is null: return new Node(val)
+  if val < node.val: node.left = insert(node.left, val)
+  if val > node.val: node.right = insert(node.right, val)
+  return node
+
+DELETE FROM BST:
+Three cases:
+1. Leaf node: simply remove
+2. One child: replace with child
+3. Two children: replace with in-order successor (smallest in right subtree), then delete successor
+
+VALIDATE BST:
+  function isValid(node, min, max):
+    if node is null: return true
+    if node.val <= min or node.val >= max: return false
+    return isValid(node.left, min, node.val) and
+           isValid(node.right, node.val, max)
+  Call: isValid(root, -Infinity, Infinity)
+
+KTH SMALLEST IN BST:
+In-order traversal, count until k. O(H + k) time.
+
+═══════════════════════════════════════════════════════
+PATTERN 4: CONSTRUCTION
+═══════════════════════════════════════════════════════
+
+BUILD TREE FROM PREORDER + INORDER:
+Preorder first element = root.
+Find root in inorder → left subtree elements are before it, right after.
+Recursively build left and right subtrees.
+Time: O(n) with hash map for inorder indices.
+
+BUILD TREE FROM INORDER + POSTORDER:
+Similar — postorder last element = root.
+
+SERIALIZE / DESERIALIZE BINARY TREE:
+Serialize: BFS or preorder with null markers.
+Deserialize: reconstruct from the serialized format using a queue.
+
+═══════════════════════════════════════════════════════
+PATTERN 5: TREE BFS PROBLEMS
+═══════════════════════════════════════════════════════
+
+LEVEL ORDER TRAVERSAL: Collect nodes level by level into nested arrays.
+RIGHT SIDE VIEW: Last node at each BFS level.
+ZIGZAG LEVEL ORDER: Alternate left-to-right and right-to-left per level.
+MINIMUM DEPTH: BFS — first leaf encountered gives the minimum depth.
+CONNECT NEXT RIGHT POINTERS: BFS to link nodes at same level.
+
+═══════════════════════════════════════════════════════
+SPECIAL TREES
+═══════════════════════════════════════════════════════
+
+TRIE (Prefix Tree):
+Tree where each node represents a character. Used for prefix-based searches.
+- insert(word): O(L)
+- search(word): O(L)
+- startsWith(prefix): O(L)
+Applications: autocomplete, spell checker, word games.
+
+Node structure: children map (char → TrieNode), isEndOfWord boolean.
+
+SEGMENT TREE:
+Binary tree for range queries (sum, min, max) with point updates.
+Build: O(n), Query: O(log n), Update: O(log n)
+
+═══════════════════════════════════════════════════════
+COMPLEXITY ANALYSIS
+═══════════════════════════════════════════════════════
+
+Operation          BST (avg)    BST (worst)    Balanced BST
+────────────────────────────────────────────────────────────
+Search             O(log n)     O(n)           O(log n)
+Insert             O(log n)     O(n)           O(log n)
+Delete             O(log n)     O(n)           O(log n)
+Traversal          O(n)         O(n)           O(n)
+LCA                O(n)         O(n)           O(log n)
+
+═══════════════════════════════════════════════════════
+TIPS AND COMMON MISTAKES
+═══════════════════════════════════════════════════════
+
+- Most tree problems are solved with DFS recursion. Master the "what do I return, what do I pass down" pattern.
+- Think about your base case FIRST: what happens at null? At a leaf?
+- For BST problems, exploit the sorted property — don't traverse unnecessarily.
+- If a problem asks for something at each level, use BFS (level-order).
+- Diameter, balanced check, and path problems often need bottom-up (return info from children).
+- When the problem says "binary tree" (not BST), you cannot assume sorted order.
+- Iterative traversals use an explicit stack and are preferred when recursion depth might overflow.
+- For "all paths" problems, use backtracking (add to path, recurse, remove from path).
+- Trie is the go-to for string prefix problems — don't use a hash map of all prefixes.

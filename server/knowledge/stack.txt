@@ -1,0 +1,182 @@
+STACK — Complete Study Guide for Coding Interviews
+
+═══════════════════════════════════════════════════════
+CORE CONCEPTS
+═══════════════════════════════════════════════════════
+
+A Stack is a linear data structure that follows Last-In-First-Out (LIFO) principle. The last element added is the first one removed. Think of a stack of plates — you add and remove from the top only.
+
+Key Operations (all O(1)):
+- push(element): Add element to the top
+- pop(): Remove and return top element
+- peek()/top(): View top element without removing
+- isEmpty(): Check if stack is empty
+
+Implementation: Arrays (most common) or Linked Lists.
+
+When to Use a Stack:
+- Processing elements in reverse order
+- Matching parentheses/brackets
+- Tracking "most recent" state that you might need to undo
+- Monotonic stack problems (next greater/smaller element)
+- DFS traversal (implicit stack via recursion, or explicit)
+- Expression evaluation and parsing
+
+═══════════════════════════════════════════════════════
+PATTERN 1: MATCHING & VALIDATION
+═══════════════════════════════════════════════════════
+
+VALID PARENTHESES:
+Push opening brackets onto stack. For closing brackets, check if top matches.
+If mismatch or stack empty on close: invalid. If stack non-empty at end: invalid.
+Time: O(n), Space: O(n)
+
+Template:
+  stack = []
+  map = {')': '(', ']': '[', '}': '{'}
+  For each char in string:
+    If char is opening: push(char)
+    Else:
+      If stack is empty or stack.top != map[char]: return false
+      stack.pop()
+  Return stack.isEmpty()
+
+MINIMUM REMOVE TO MAKE VALID PARENTHESES:
+First pass: use stack to track indices of unmatched '('.
+Also track unmatched ')' (when stack is empty).
+Second pass: build result string skipping marked indices.
+Time: O(n), Space: O(n)
+
+═══════════════════════════════════════════════════════
+PATTERN 2: MONOTONIC STACK
+═══════════════════════════════════════════════════════
+
+A monotonic stack maintains elements in increasing or decreasing order. When a new element violates the order, pop elements until the invariant is restored.
+
+NEXT GREATER ELEMENT:
+For each element, find the next element to the right that is greater.
+Use a decreasing monotonic stack. When new element > stack.top, pop and record answer.
+Time: O(n), Space: O(n)
+
+Template (Next Greater Element):
+  result = [-1] * n
+  stack = []  // stores indices
+  For i from 0 to n-1:
+    While stack is not empty and arr[i] > arr[stack.top]:
+      idx = stack.pop()
+      result[idx] = arr[i]
+    stack.push(i)
+  Return result
+
+DAILY TEMPERATURES:
+For each day, find how many days until a warmer temperature.
+Same as Next Greater Element — use a decreasing stack of indices.
+result[idx] = i - idx when we find a warmer day.
+Time: O(n), Space: O(n)
+
+LARGEST RECTANGLE IN HISTOGRAM:
+For each bar, find the width of the largest rectangle using it as the minimum height.
+Use an increasing monotonic stack. When a shorter bar is found, pop and calculate area.
+Width = i - stack.top - 1 (or i if stack is empty).
+Time: O(n), Space: O(n)
+
+TRAPPING RAIN WATER (Stack approach):
+Use a decreasing stack. When a taller bar is found, pop and calculate trapped water.
+Water width = i - stack.top - 1, height = min(arr[i], arr[stack.top]) - arr[popped].
+Time: O(n), Space: O(n)
+
+═══════════════════════════════════════════════════════
+PATTERN 3: EXPRESSION EVALUATION
+═══════════════════════════════════════════════════════
+
+EVALUATE REVERSE POLISH NOTATION:
+Push operands onto stack. When operator encountered, pop two operands, compute, push result.
+Time: O(n), Space: O(n)
+
+BASIC CALCULATOR:
+Use stack for nested expressions. Push current result and sign when '(' encountered.
+Pop and combine when ')' encountered.
+Handle +, -, and nested parentheses.
+Time: O(n), Space: O(n)
+
+DECODE STRING:
+For "3[a2[c]]" → "accaccacc"
+Push current string and count when '[' encountered.
+Pop and repeat when ']' encountered.
+Time: O(n * max_repeat), Space: O(n)
+
+═══════════════════════════════════════════════════════
+PATTERN 4: DESIGN PROBLEMS
+═══════════════════════════════════════════════════════
+
+MIN STACK:
+Support push, pop, top, getMin all in O(1).
+Use two stacks: main stack + min stack.
+Min stack stores the minimum at each level.
+Push to min stack: min(val, currentMin).
+
+IMPLEMENT QUEUE USING STACKS:
+Use two stacks: input and output.
+Push: always to input stack.
+Pop/Peek: if output is empty, pour all input into output (reversing order), then pop from output.
+Amortized O(1) per operation.
+
+═══════════════════════════════════════════════════════
+SOLUTION TEMPLATES
+═══════════════════════════════════════════════════════
+
+Monotonic Decreasing Stack (Next Greater):
+  result = new Array(n).fill(-1)
+  stack = []
+  For i from 0 to n-1:
+    While stack.length > 0 and arr[i] > arr[stack[stack.length-1]]:
+      idx = stack.pop()
+      result[idx] = arr[i]
+    stack.push(i)
+
+Monotonic Increasing Stack (Next Smaller):
+  result = new Array(n).fill(-1)
+  stack = []
+  For i from 0 to n-1:
+    While stack.length > 0 and arr[i] < arr[stack[stack.length-1]]:
+      idx = stack.pop()
+      result[idx] = arr[i]
+    stack.push(i)
+
+Histogram Largest Rectangle:
+  stack = [], maxArea = 0
+  For i from 0 to n (inclusive, treat heights[n] = 0):
+    h = (i == n) ? 0 : heights[i]
+    While stack is not empty and h < heights[stack.top]:
+      height = heights[stack.pop()]
+      width = stack.isEmpty() ? i : i - stack.top - 1
+      maxArea = max(maxArea, height * width)
+    stack.push(i)
+  Return maxArea
+
+═══════════════════════════════════════════════════════
+COMPLEXITY ANALYSIS
+═══════════════════════════════════════════════════════
+
+Operation        Time     Space
+──────────────────────────────────
+push             O(1)     —
+pop              O(1)     —
+peek/top         O(1)     —
+isEmpty          O(1)     —
+Monotonic stack  O(n)     O(n)
+Valid parens     O(n)     O(n)
+Expression eval  O(n)     O(n)
+
+═══════════════════════════════════════════════════════
+TIPS AND COMMON MISTAKES
+═══════════════════════════════════════════════════════
+
+- Always check if stack is empty before calling pop() or peek().
+- Monotonic stacks process each element exactly twice (push + pop), so they're O(n) total.
+- For "next greater/smaller" problems, store INDICES in the stack, not values. This lets you calculate distances.
+- For circular arrays (like Next Greater Element II), iterate 2*n times using i % n.
+- When you see nested structures (parentheses, HTML tags, directory paths), think stack.
+- DFS on graphs/trees can use an explicit stack instead of recursion (avoids stack overflow for deep trees).
+- Stack is great for "undo" operations — push state, pop to revert.
+- Common trap: forgetting to process remaining elements in the stack after the main loop.

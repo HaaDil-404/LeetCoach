@@ -18,8 +18,17 @@ import {
   Zap,
   Copy,
   Check,
+  Database,
+  FileText,
+  Search,
+  RefreshCw,
+  BookMarked,
 } from "lucide-react";
 import { aiAPI } from "../api";
+import { useToast } from "../components/Toast";
+import { SkeletonAIResponse, SkeletonParagraph, SkeletonKnowledgeResult } from "../components/SkeletonLoader";
+import EmptyState from "../components/EmptyState";
+import RAGStatusBadge from "../components/RAGStatusBadge";
 
 // ── Tab Configuration ──
 const tabs = [
@@ -27,6 +36,7 @@ const tabs = [
   { id: "explain", label: "Explainer", icon: BookOpen, color: "text-easy" },
   { id: "tutor", label: "Tutor", icon: MessageSquare, color: "text-medium" },
   { id: "review", label: "Code Review", icon: SearchCode, color: "text-hard" },
+  { id: "knowledge", label: "Knowledge", icon: Database, color: "text-[#a78bfa]" },
 ];
 
 const difficulties = ["Easy", "Medium", "Hard"];
@@ -96,13 +106,13 @@ function RenderContent({ text }) {
 
     if (line.startsWith("## ")) {
       elements.push(
-        <h3 key={i} className="text-base font-semibold text-text-primary mt-4 mb-2">
+        <h3 key={i} className="text-base font-semibold text-text-primary mt-4 mb-2 tracking-tight">
           {line.slice(3)}
         </h3>
       );
     } else if (line.startsWith("### ")) {
       elements.push(
-        <h4 key={i} className="text-sm font-semibold text-text-primary mt-3 mb-1">
+        <h4 key={i} className="text-sm font-semibold text-text-primary mt-3 mb-1 tracking-tight">
           {line.slice(4)}
         </h4>
       );
@@ -157,30 +167,6 @@ function formatInlineCode(text) {
   });
 }
 
-// ── Typing indicator ──
-function TypingIndicator() {
-  return (
-    <div className="flex items-center gap-3 p-6">
-      <div className="flex gap-1.5">
-        {[0, 1, 2].map((i) => (
-          <motion.div
-            key={i}
-            className="w-2 h-2 rounded-full bg-accent"
-            animate={{ y: [0, -6, 0], opacity: [0.4, 1, 0.4] }}
-            transition={{
-              duration: 0.8,
-              repeat: Infinity,
-              delay: i * 0.15,
-              ease: "easeInOut",
-            }}
-          />
-        ))}
-      </div>
-      <span className="text-xs text-text-muted">LeetCoach AI is thinking...</span>
-    </div>
-  );
-}
-
 // ═══════════════════════════════════════════════════════════════
 //  HINT GENERATOR TAB
 // ═══════════════════════════════════════════════════════════════
@@ -191,6 +177,7 @@ function HintsTab() {
   const [loading, setLoading] = useState(false);
   const [revealedHints, setRevealedHints] = useState([]);
   const [error, setError] = useState("");
+  const { showToast } = useToast();
 
   const handleGenerate = async () => {
     if (!description.trim()) return;
@@ -204,8 +191,11 @@ function HintsTab() {
         difficulty,
       });
       setHints(res.data.data);
+      showToast("Hints generated successfully!", "success");
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to generate hints");
+      const msg = err.response?.data?.message || "Failed to generate hints";
+      setError(msg);
+      showToast(msg, "error");
     } finally {
       setLoading(false);
     }
@@ -285,10 +275,17 @@ function HintsTab() {
         </motion.div>
       )}
 
-      {/* Loading */}
-      {loading && (
+      {/* Skeleton Loading */}
+      {loading && <SkeletonAIResponse />}
+
+      {/* Empty State */}
+      {!loading && !hints && !error && (
         <div className="glass-card">
-          <TypingIndicator />
+          <EmptyState
+            icon={Lightbulb}
+            title="Get Progressive Hints"
+            description="Paste a problem description and select difficulty to receive three progressive hints — from gentle nudge to detailed guidance."
+          />
         </div>
       )}
 
@@ -366,6 +363,7 @@ function ExplainTab() {
   const [loading, setLoading] = useState(false);
   const [activeSection, setActiveSection] = useState("beginner");
   const [error, setError] = useState("");
+  const { showToast } = useToast();
 
   const handleExplain = async () => {
     if (!description.trim()) return;
@@ -379,8 +377,11 @@ function ExplainTab() {
       });
       setExplanation(res.data.data);
       setActiveSection("beginner");
+      showToast("Explanation ready!", "success");
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to generate explanation");
+      const msg = err.response?.data?.message || "Failed to generate explanation";
+      setError(msg);
+      showToast(msg, "error");
     } finally {
       setLoading(false);
     }
@@ -460,9 +461,18 @@ function ExplainTab() {
         </motion.div>
       )}
 
-      {loading && (
+      {loading && <SkeletonAIResponse />}
+
+      {/* Empty State */}
+      {!loading && !explanation && !error && (
         <div className="glass-card">
-          <TypingIndicator />
+          <EmptyState
+            icon={BookOpen}
+            title="Solution Explainer"
+            description="Get beginner-friendly and detailed explanations with time & space complexity analysis for any problem."
+            iconColor="text-easy"
+            iconBg="bg-easy/10"
+          />
         </div>
       )}
 
@@ -519,6 +529,7 @@ function TutorTab() {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const { showToast } = useToast();
 
   const handleSend = async () => {
     if (!question.trim()) return;
@@ -532,7 +543,9 @@ function TutorTab() {
       const aiMsg = { role: "ai", content: res.data.data.response };
       setMessages((prev) => [...prev, aiMsg]);
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to get response");
+      const msg = err.response?.data?.message || "Failed to get response";
+      setError(msg);
+      showToast(msg, "error");
     } finally {
       setLoading(false);
     }
@@ -582,21 +595,13 @@ function TutorTab() {
       {/* Chat Messages */}
       <div className="glass-card overflow-hidden">
         {messages.length === 0 && !loading ? (
-          <div className="p-12 text-center">
-            <motion.div
-              animate={{ y: [0, -6, 0] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-              className="w-14 h-14 rounded-2xl bg-medium/10 flex items-center justify-center mx-auto mb-4"
-            >
-              <MessageSquare className="w-7 h-7 text-medium" />
-            </motion.div>
-            <p className="text-sm text-text-secondary">
-              Ask me anything about <span className="text-medium font-semibold">{topic}</span>
-            </p>
-            <p className="text-xs text-text-muted mt-1">
-              I'll explain with examples, analogies, and code snippets
-            </p>
-          </div>
+          <EmptyState
+            icon={MessageSquare}
+            title={`Ask about ${topic}`}
+            description="I'll explain with examples, analogies, and code snippets. Ask anything!"
+            iconColor="text-medium"
+            iconBg="bg-medium/10"
+          />
         ) : (
           <div className="max-h-[500px] overflow-y-auto p-4 space-y-4">
             {messages.map((msg, i) => (
@@ -626,7 +631,11 @@ function TutorTab() {
                 </div>
               </motion.div>
             ))}
-            {loading && <TypingIndicator />}
+            {loading && (
+              <div className="px-2">
+                <SkeletonParagraph lines={3} />
+              </div>
+            )}
           </div>
         )}
 
@@ -671,6 +680,7 @@ function ReviewTab() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
+  const { showToast } = useToast();
 
   const handleReview = async () => {
     if (!code.trim()) return;
@@ -683,8 +693,11 @@ function ReviewTab() {
         problemDescription: problemDescription || undefined,
       });
       setReview(res.data.data);
+      showToast(`Code reviewed — Score: ${res.data.data.score}/10`, "success");
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to review code");
+      const msg = err.response?.data?.message || "Failed to review code";
+      setError(msg);
+      showToast(msg, "error");
     } finally {
       setLoading(false);
     }
@@ -695,6 +708,7 @@ function ReviewTab() {
     const text = `Logic: ${review.logic}\nTime: ${review.timeComplexity}\nSpace: ${review.spaceComplexity}\nBugs: ${review.bugs}\nOptimizations: ${review.optimizations}\nScore: ${review.score}/10`;
     navigator.clipboard.writeText(text);
     setCopied(true);
+    showToast("Review copied to clipboard!", "info");
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -809,9 +823,18 @@ function ReviewTab() {
         </motion.div>
       )}
 
-      {loading && (
+      {loading && <SkeletonAIResponse />}
+
+      {/* Empty State */}
+      {!loading && !review && !error && (
         <div className="glass-card">
-          <TypingIndicator />
+          <EmptyState
+            icon={SearchCode}
+            title="AI Code Review"
+            description="Paste your code to get a detailed analysis — logic, complexity, bugs, optimizations, and an overall score."
+            iconColor="text-hard"
+            iconBg="bg-hard/10"
+          />
         </div>
       )}
 
@@ -877,6 +900,268 @@ function ReviewTab() {
 }
 
 // ═══════════════════════════════════════════════════════════════
+//  KNOWLEDGE BASE TAB (RAG)
+// ═══════════════════════════════════════════════════════════════
+function KnowledgeBaseTab() {
+  const [question, setQuestion] = useState("");
+  const [lastQuestion, setLastQuestion] = useState("");
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [copied, setCopied] = useState(false);
+  const { showToast } = useToast();
+
+  const suggestedQuestions = [
+    "How do I solve Two Sum?",
+    "Explain binary search step by step",
+    "What is the sliding window technique?",
+    "How does Dijkstra's algorithm work?",
+    "When should I use dynamic programming?",
+    "What are monotonic stacks used for?",
+    "Explain the two-pointer pattern",
+    "How do I detect a cycle in a linked list?",
+  ];
+
+  const handleAsk = async (q) => {
+    const query = q || question;
+    if (!query.trim()) return;
+    setLoading(true);
+    setError("");
+    setResult(null);
+    setLastQuestion(query.trim());
+    try {
+      const res = await aiAPI.askKnowledgeBase({ question: query.trim() });
+      setResult(res.data.data);
+      showToast("Answer retrieved from knowledge base!", "success");
+    } catch (err) {
+      const msg = err.response?.data?.message || "Failed to query knowledge base";
+      setError(msg);
+      showToast(msg, "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleAsk();
+    }
+  };
+
+  const handleCopyAnswer = () => {
+    if (!result?.answer) return;
+    navigator.clipboard.writeText(result.answer);
+    setCopied(true);
+    showToast("Answer copied to clipboard!", "info");
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleRetry = () => {
+    setError("");
+    handleAsk(lastQuestion);
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header with RAG Status */}
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <BookMarked className="w-4 h-4 text-[#a78bfa]" />
+            <span className="text-xs font-medium text-[#a78bfa] uppercase tracking-wider">
+              Vector Knowledge Base
+            </span>
+          </div>
+          <p className="text-xs text-text-muted">
+            11 DSA topic guides · LangChain + ChromaDB · Gemini embeddings
+          </p>
+        </div>
+        <RAGStatusBadge />
+      </div>
+
+      {/* Search Input */}
+      <div className="glass-card p-6">
+        <label className="block text-xs font-medium text-text-secondary uppercase tracking-wider mb-2">
+          Ask the Knowledge Base
+        </label>
+        <div className="flex gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+            <input
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="How do I solve Two Sum?"
+              className="w-full bg-bg-input border border-border rounded-xl pl-11 pr-4 py-3.5 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-[#a78bfa]/40 transition-colors"
+            />
+          </div>
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => handleAsk()}
+            disabled={loading || !question.trim()}
+            className="px-6 py-3 rounded-xl bg-[#a78bfa] text-bg-primary font-semibold text-sm flex items-center gap-2 hover:bg-[#c4b5fd] transition-colors disabled:opacity-50 cursor-pointer shadow-lg shadow-[#a78bfa]/20 shrink-0"
+          >
+            {loading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Database className="w-4 h-4" />
+            )}
+            {loading ? "Searching..." : "Ask"}
+          </motion.button>
+        </div>
+
+        {/* Suggested Questions */}
+        {!result && !loading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="mt-4"
+          >
+            <p className="text-xs text-text-muted mb-2">Try asking:</p>
+            <div className="flex flex-wrap gap-2">
+              {suggestedQuestions.map((q, i) => (
+                <motion.button
+                  key={i}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => {
+                    setQuestion(q);
+                    handleAsk(q);
+                  }}
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[#a78bfa]/10 text-[#a78bfa] border border-[#a78bfa]/20 hover:bg-[#a78bfa]/20 transition-colors cursor-pointer"
+                >
+                  {q}
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </div>
+
+      {/* Error with Retry */}
+      {error && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="glass-card p-4 border border-hard/25 bg-hard/5"
+        >
+          <div className="flex items-start gap-3">
+            <XCircle className="w-4 h-4 text-hard shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-hard">Query Failed</p>
+              <p className="text-xs text-text-muted mt-1 leading-relaxed">{error}</p>
+            </div>
+            {lastQuestion && (
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleRetry}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-hard/10 text-hard text-xs font-semibold hover:bg-hard/20 transition-colors cursor-pointer shrink-0"
+              >
+                <RefreshCw className="w-3 h-3" />
+                Retry
+              </motion.button>
+            )}
+          </div>
+        </motion.div>
+      )}
+
+      {/* Skeleton Loading — rich variant */}
+      {loading && <SkeletonKnowledgeResult />}
+
+      {/* Empty State */}
+      {!loading && !result && !error && (
+        <div className="glass-card">
+          <EmptyState
+            icon={Database}
+            title="RAG-Powered Knowledge Base"
+            description="Ask any DSA question. I'll search 11 topic guides using vector similarity, retrieve the most relevant chunks, and generate a comprehensive answer with source citations."
+            iconColor="text-[#a78bfa]"
+            iconBg="bg-[#a78bfa]/10"
+          />
+        </div>
+      )}
+
+      {/* Result */}
+      {result && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-4"
+        >
+          {/* Sources row */}
+          {result.sources && result.sources.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex items-center gap-2 flex-wrap"
+            >
+              <FileText className="w-3.5 h-3.5 text-text-muted" />
+              <span className="text-xs text-text-muted">Retrieved from:</span>
+              {result.sources.map((source, i) => (
+                <span key={i} className="source-chip">
+                  {source}
+                </span>
+              ))}
+            </motion.div>
+          )}
+
+          {/* Answer card */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="glass-card p-6 border-l-2 border-[#a78bfa]/30"
+          >
+            {/* Card header */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-[#a78bfa]/10 flex items-center justify-center">
+                  <BrainCircuit className="w-4 h-4 text-[#a78bfa]" />
+                </div>
+                <span className="text-xs font-semibold text-[#a78bfa] uppercase tracking-wider">
+                  RAG Response
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                {/* Ask another */}
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => { setResult(null); setQuestion(""); }}
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium bg-white/5 text-text-muted hover:text-text-secondary border border-white/8 hover:bg-white/8 transition-all cursor-pointer"
+                >
+                  Ask another
+                </motion.button>
+                {/* Copy answer */}
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleCopyAnswer}
+                  title={copied ? "Copied!" : "Copy answer"}
+                  className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-text-muted hover:text-[#a78bfa] border border-white/8 hover:border-[#a78bfa]/20 transition-all cursor-pointer"
+                >
+                  {copied ? (
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  ) : (
+                    <Copy className="w-3.5 h-3.5" />
+                  )}
+                </motion.button>
+              </div>
+            </div>
+
+            <RenderContent text={result.answer} />
+          </motion.div>
+        </motion.div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
 //  MAIN AI FEATURES PAGE
 // ═══════════════════════════════════════════════════════════════
 export default function AIFeatures() {
@@ -901,11 +1186,11 @@ export default function AIFeatures() {
               AI Study Tools
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">
+          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">
             Your AI <span className="gradient-text">Learning Assistant</span>
           </h1>
           <p className="text-sm text-text-secondary mt-1">
-            Powered by Gemini AI — get hints, explanations, tutoring, and code reviews
+            Gemini 2.0 Flash · LangChain RAG · ChromaDB · 11 DSA topic guides
           </p>
         </motion.div>
       </div>
@@ -950,6 +1235,7 @@ export default function AIFeatures() {
           {activeTab === "explain" && <ExplainTab />}
           {activeTab === "tutor" && <TutorTab />}
           {activeTab === "review" && <ReviewTab />}
+          {activeTab === "knowledge" && <KnowledgeBaseTab />}
         </motion.div>
       </AnimatePresence>
     </motion.div>

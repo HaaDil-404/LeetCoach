@@ -1,0 +1,189 @@
+BINARY SEARCH — Complete Study Guide for Coding Interviews
+
+═══════════════════════════════════════════════════════
+CORE CONCEPTS
+═══════════════════════════════════════════════════════
+
+Binary Search is a divide-and-conquer algorithm that finds a target element in a sorted array by repeatedly halving the search space. It achieves O(log n) time complexity, making it vastly faster than linear search for large datasets.
+
+Prerequisites:
+- The search space must be SORTED (or have a monotonic property)
+- You must be able to determine which half to discard at each step
+
+Key Insight: At each step, you eliminate half of the remaining candidates. This is why binary search is O(log n) — you need at most log₂(n) comparisons.
+
+Binary search isn't just for arrays. It can be applied to any problem where:
+1. The answer lies in a sorted/monotonic search space
+2. You can verify if a candidate answer is valid in reasonable time
+
+═══════════════════════════════════════════════════════
+PATTERN 1: STANDARD BINARY SEARCH
+═══════════════════════════════════════════════════════
+
+Find exact target in a sorted array.
+
+Template:
+  left = 0, right = n - 1
+  While left <= right:
+    mid = left + (right - left) / 2    // avoid integer overflow
+    If arr[mid] == target:
+      Return mid
+    Else if arr[mid] < target:
+      left = mid + 1
+    Else:
+      right = mid - 1
+  Return -1  // not found
+
+Important: Use left + (right - left) / 2 instead of (left + right) / 2 to prevent integer overflow.
+
+═══════════════════════════════════════════════════════
+PATTERN 2: FIND BOUNDARY (Lower/Upper Bound)
+═══════════════════════════════════════════════════════
+
+Find the first or last position where a condition is true.
+
+FIND FIRST OCCURRENCE (Lower Bound):
+  left = 0, right = n - 1, result = -1
+  While left <= right:
+    mid = left + (right - left) / 2
+    If arr[mid] >= target:
+      result = mid          // potential answer, but keep searching left
+      right = mid - 1
+    Else:
+      left = mid + 1
+  Return result
+
+FIND LAST OCCURRENCE (Upper Bound):
+  left = 0, right = n - 1, result = -1
+  While left <= right:
+    mid = left + (right - left) / 2
+    If arr[mid] <= target:
+      result = mid          // potential answer, but keep searching right
+      left = mid + 1
+    Else:
+      right = mid - 1
+  Return result
+
+═══════════════════════════════════════════════════════
+PATTERN 3: BINARY SEARCH ON ANSWER
+═══════════════════════════════════════════════════════
+
+The answer is in a range [lo, hi]. Binary search on the answer and use a feasibility check.
+
+Template:
+  lo = minimum_possible_answer
+  hi = maximum_possible_answer
+  While lo < hi:
+    mid = lo + (hi - lo) / 2
+    If isFeasible(mid):
+      hi = mid             // mid could be the answer, search lower
+    Else:
+      lo = mid + 1         // mid is too small
+  Return lo
+
+Example problems:
+- KOKO EATING BANANAS: Binary search on eating speed. Check if all bananas can be eaten in h hours.
+- CAPACITY TO SHIP PACKAGES: Binary search on ship capacity. Check if all packages can be shipped in d days.
+- SPLIT ARRAY LARGEST SUM: Binary search on the maximum subarray sum. Check if array can be split into m parts.
+
+═══════════════════════════════════════════════════════
+COMMON PROBLEM TYPES
+═══════════════════════════════════════════════════════
+
+SEARCH IN ROTATED SORTED ARRAY:
+Array is sorted but rotated. One half is always sorted.
+Determine which half is sorted, check if target is in that half.
+Time: O(log n)
+
+FIND MINIMUM IN ROTATED SORTED ARRAY:
+Compare mid with right. If arr[mid] > arr[right], minimum is in right half.
+Otherwise, minimum is in left half (including mid).
+Time: O(log n)
+
+SEARCH A 2D MATRIX:
+Treat the 2D matrix as a flattened 1D sorted array.
+Map index: row = mid / cols, col = mid % cols.
+Time: O(log(m*n))
+
+FIND PEAK ELEMENT:
+If arr[mid] > arr[mid+1]: peak is on the left (including mid). right = mid.
+Else: peak is on the right. left = mid + 1.
+Time: O(log n)
+
+MEDIAN OF TWO SORTED ARRAYS:
+Binary search on the partition point of the smaller array.
+Ensure left half elements ≤ right half elements.
+Time: O(log(min(m, n)))
+
+FIRST BAD VERSION:
+Binary search on versions. If isBadVersion(mid), the first bad version is at mid or earlier.
+Time: O(log n)
+
+SQRT(X) / PERFECT SQUARE:
+Binary search for the largest integer whose square is ≤ x.
+Time: O(log x)
+
+═══════════════════════════════════════════════════════
+SOLUTION TEMPLATES
+═══════════════════════════════════════════════════════
+
+Standard Binary Search:
+  left, right = 0, n - 1
+  While left <= right:
+    mid = left + Math.floor((right - left) / 2)
+    If nums[mid] === target: return mid
+    If nums[mid] < target: left = mid + 1
+    Else: right = mid - 1
+  Return -1
+
+Rotated Array Search:
+  left, right = 0, n - 1
+  While left <= right:
+    mid = left + Math.floor((right - left) / 2)
+    If nums[mid] === target: return mid
+    If nums[left] <= nums[mid]:     // left half is sorted
+      If nums[left] <= target < nums[mid]:
+        right = mid - 1
+      Else:
+        left = mid + 1
+    Else:                            // right half is sorted
+      If nums[mid] < target <= nums[right]:
+        left = mid + 1
+      Else:
+        right = mid - 1
+
+Binary Search on Answer:
+  lo = min_answer, hi = max_answer
+  While lo < hi:
+    mid = lo + Math.floor((hi - lo) / 2)
+    If canAchieve(mid):
+      hi = mid
+    Else:
+      lo = mid + 1
+  Return lo
+
+═══════════════════════════════════════════════════════
+COMPLEXITY ANALYSIS
+═══════════════════════════════════════════════════════
+
+Operation                    Time          Space
+────────────────────────────────────────────────────
+Standard search              O(log n)      O(1)
+Search rotated array         O(log n)      O(1)
+Binary search on answer      O(log R * C)  O(1)
+  where R = range, C = cost of feasibility check
+Recursive binary search      O(log n)      O(log n) stack
+
+═══════════════════════════════════════════════════════
+TIPS AND COMMON MISTAKES
+═══════════════════════════════════════════════════════
+
+- THE #1 BUG: off-by-one errors in loop condition and mid calculation.
+  Use left <= right for exact search, left < right for boundary search.
+- Use left + (right - left) / 2 to avoid overflow (not (left + right) / 2).
+- When using left < right with hi = mid, do NOT set hi = mid - 1 (you'll skip valid answers).
+- For boundary problems, always check: does your loop terminate? Try small examples (n=1, n=2).
+- Binary search on answer is extremely powerful for optimization problems — look for "minimize the maximum" or "maximize the minimum."
+- If the problem says "sorted" or "monotonic," think binary search.
+- For floating-point binary search, use a fixed number of iterations (~100) instead of while lo < hi.
+- Always test edge cases: empty array, single element, target at boundaries, target not present.

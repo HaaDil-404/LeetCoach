@@ -1,0 +1,161 @@
+HASHING — Complete Study Guide for Coding Interviews
+
+═══════════════════════════════════════════════════════
+CORE CONCEPTS
+═══════════════════════════════════════════════════════
+
+Hashing is a technique that maps data of arbitrary size to fixed-size values using a hash function. Hash tables (hash maps) use this to provide average O(1) insertion, deletion, and lookup operations.
+
+Key Components:
+- Hash Function: Converts a key into an integer index. A good hash function distributes keys uniformly.
+- Hash Table: An array where each position (bucket) stores key-value pairs.
+- Collision: When two different keys hash to the same index.
+- Load Factor: ratio of stored elements to table size. Typically resize when > 0.75.
+
+Collision Resolution:
+- Chaining: Each bucket stores a linked list of entries. Simple but uses extra memory.
+- Open Addressing: Find the next empty slot (linear probing, quadratic probing, double hashing).
+- Robin Hood Hashing: Variant of open addressing that minimizes probe sequence variance.
+
+In interviews, you rarely implement hash tables from scratch. Instead, use built-in HashMap/Map/dict/Object.
+
+═══════════════════════════════════════════════════════
+ESSENTIAL PATTERNS
+═══════════════════════════════════════════════════════
+
+1. FREQUENCY COUNTING
+Count occurrences of each element. Use a hash map where key = element, value = count.
+Example: Find the most frequent element, check if two strings are anagrams, find duplicates.
+
+2. TWO SUM PATTERN (Complement Lookup)
+For each element, compute the complement and check if it exists in the map.
+Generalized: "Find a pair/triplet with property X" → store seen elements, check complement.
+Example problems: Two Sum, 4Sum II, Count Pairs With Given Sum.
+
+3. GROUPING / BUCKETING
+Group elements by a shared property using a hash map where key = property, value = list of elements.
+Example: Group Anagrams (key = sorted string), Group by frequency.
+
+4. INDEX MAPPING
+Store the index of elements for quick position lookups.
+Example: First non-repeating character, Intersection of Two Arrays.
+
+5. PREFIX SUM + HASH MAP
+Combine prefix sums with a hash map to find subarrays with a given sum.
+Key insight: if prefix[j] - prefix[i] = target, then subarray [i+1...j] sums to target.
+Store prefix sums in a map: map[prefixSum] = count of occurrences.
+Example problems: Subarray Sum Equals K, Contiguous Array (0s and 1s).
+
+6. SLIDING WINDOW + HASH MAP
+Use a hash map to track element counts within a sliding window.
+Example: Longest Substring Without Repeating Characters, Minimum Window Substring.
+
+═══════════════════════════════════════════════════════
+COMMON PROBLEM TYPES
+═══════════════════════════════════════════════════════
+
+TWO SUM:
+Given an array and a target, find indices of two numbers that add up to target.
+Use a hash map to store each number and its index. For each num, check if (target - num) is in the map.
+Time: O(n), Space: O(n).
+
+GROUP ANAGRAMS:
+Given a list of strings, group anagrams together.
+For each string, sort it to create a key. Map sorted_string → list of original strings.
+Time: O(n * k log k) where k is max string length.
+
+LONGEST SUBSTRING WITHOUT REPEATING CHARACTERS:
+Use a sliding window with a hash map tracking the last index of each character.
+When a repeat is found, move the left pointer past the previous occurrence.
+Time: O(n), Space: O(min(n, alphabet_size)).
+
+SUBARRAY SUM EQUALS K:
+Use prefix sums with a hash map. For each prefix sum, check if (prefixSum - k) exists in the map.
+Initialize map with {0: 1} to handle subarrays starting from index 0.
+Time: O(n), Space: O(n).
+
+VALID ANAGRAM:
+Count character frequencies of both strings. Compare the frequency maps.
+Alternative: Sort both strings and compare. O(n log n) vs O(n).
+
+CONTAINS DUPLICATE:
+Insert elements into a hash set. If insertion fails (element already exists), return true.
+Time: O(n), Space: O(n).
+
+═══════════════════════════════════════════════════════
+SOLUTION TEMPLATES
+═══════════════════════════════════════════════════════
+
+Frequency Counter:
+  freq = {}
+  For each element in array:
+    freq[element] = (freq[element] or 0) + 1
+
+Two Sum with Hash Map:
+  map = {}
+  For i, num in enumerate(array):
+    complement = target - num
+    If complement in map:
+      Return [map[complement], i]
+    map[num] = i
+
+Subarray Sum Equals K:
+  count = 0, prefixSum = 0
+  map = {0: 1}
+  For each num in array:
+    prefixSum += num
+    If (prefixSum - k) in map:
+      count += map[prefixSum - k]
+    map[prefixSum] = (map[prefixSum] or 0) + 1
+  Return count
+
+Group by Property:
+  groups = {}
+  For each item in collection:
+    key = computeKey(item)
+    If key not in groups:
+      groups[key] = []
+    groups[key].append(item)
+
+═══════════════════════════════════════════════════════
+HASH SET vs HASH MAP
+═══════════════════════════════════════════════════════
+
+Hash Set:
+- Stores only keys (no values)
+- Used for membership testing: "Is X in the set?"
+- O(1) add, remove, contains
+- Example: Find duplicates, set intersection/union/difference
+
+Hash Map:
+- Stores key-value pairs
+- Used for associations: "What is the value for key X?"
+- O(1) get, put, delete
+- Example: Frequency counting, index mapping, caching
+
+═══════════════════════════════════════════════════════
+COMPLEXITY ANALYSIS
+═══════════════════════════════════════════════════════
+
+Operation           Average     Worst Case
+──────────────────────────────────────────────
+Insert              O(1)        O(n)*
+Lookup              O(1)        O(n)*
+Delete              O(1)        O(n)*
+Iteration           O(n)        O(n)
+Space               O(n)        O(n)
+
+* Worst case occurs with many collisions (pathological hash function)
+
+═══════════════════════════════════════════════════════
+TIPS AND COMMON MISTAKES
+═══════════════════════════════════════════════════════
+
+- Hash maps are your best friend for reducing O(n²) to O(n).
+- When you see "find pair/triplet with sum = X," immediately think hash map.
+- Initialize prefix sum maps with {0: 1} when counting subarrays.
+- In JavaScript, use Map instead of plain objects for non-string keys.
+- Remember that hash map ordering is not guaranteed (use LinkedHashMap/OrderedDict if needed).
+- For custom objects as keys, ensure proper hash/equals implementation.
+- Space-time tradeoff: hash maps trade O(n) space for O(1) lookups.
+- Don't forget to handle the case where an element maps to itself (e.g., Two Sum with num == target/2).

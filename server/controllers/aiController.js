@@ -4,6 +4,7 @@ const {
   tutorChat,
   reviewCode,
 } = require("../services/geminiService");
+const { queryRAG, getRAGStatus } = require("../services/ragService");
 
 // @desc    Get AI-generated progressive hints for a problem
 // @route   POST /api/ai/hints
@@ -97,4 +98,50 @@ const getCodeReview = async (req, res, next) => {
   }
 };
 
-module.exports = { getHints, getSolutionExplanation, chat, getCodeReview };
+// @desc    Ask the RAG-powered knowledge base a question
+// @route   POST /api/ai/ask
+// @access  Private
+const askKnowledgeBase = async (req, res, next) => {
+  try {
+    const { question } = req.body;
+
+    if (!question || !question.trim()) {
+      res.status(400);
+      throw new Error("question is required");
+    }
+
+    const result = await queryRAG(question.trim());
+
+    res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get RAG vector store status
+// @route   GET /api/ai/rag-status
+// @access  Private
+const ragStatus = async (req, res, next) => {
+  try {
+    const status = getRAGStatus();
+
+    res.status(200).json({
+      success: true,
+      data: status,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  getHints,
+  getSolutionExplanation,
+  chat,
+  getCodeReview,
+  askKnowledgeBase,
+  ragStatus,
+};

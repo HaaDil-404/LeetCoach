@@ -1,0 +1,222 @@
+QUEUE — Complete Study Guide for Coding Interviews
+
+═══════════════════════════════════════════════════════
+CORE CONCEPTS
+═══════════════════════════════════════════════════════
+
+A Queue is a linear data structure that follows First-In-First-Out (FIFO) principle. The first element added is the first one removed. Think of a line at a store — first person in line is served first.
+
+Key Operations (all O(1)):
+- enqueue(element): Add element to the back (rear/tail)
+- dequeue(): Remove and return front element
+- peek()/front(): View front element without removing
+- isEmpty(): Check if queue is empty
+
+Implementations:
+- Array-based (circular buffer for efficiency)
+- Linked List-based (natural fit — add to tail, remove from head)
+- In JavaScript: arrays with push()/shift() (note: shift is O(n), use a proper Queue class for performance)
+
+Variants:
+- Deque (Double-Ended Queue): Add/remove from both ends in O(1)
+- Priority Queue: Elements dequeued by priority, not insertion order (heap-based)
+- Circular Queue: Fixed-size queue using circular buffer
+
+═══════════════════════════════════════════════════════
+PATTERN 1: BFS (Breadth-First Search)
+═══════════════════════════════════════════════════════
+
+The most important use of queues in interviews. BFS explores nodes level by level.
+
+BFS on a Graph/Tree:
+  queue = [startNode]
+  visited = set([startNode])
+  While queue is not empty:
+    node = queue.dequeue()
+    Process(node)
+    For each neighbor of node:
+      If neighbor not in visited:
+        visited.add(neighbor)
+        queue.enqueue(neighbor)
+
+BFS with Level Tracking:
+  queue = [startNode]
+  level = 0
+  While queue is not empty:
+    levelSize = queue.length
+    For i from 0 to levelSize-1:
+      node = queue.dequeue()
+      Process(node, level)
+      Add unvisited neighbors to queue
+    level++
+
+KEY BFS PROBLEMS:
+
+BINARY TREE LEVEL ORDER TRAVERSAL:
+Use BFS with level tracking. Collect all nodes at each level into a subarray.
+Time: O(n), Space: O(n)
+
+SHORTEST PATH IN UNWEIGHTED GRAPH:
+BFS naturally finds shortest paths in unweighted graphs.
+The first time you reach a node is the shortest path to it.
+Time: O(V + E), Space: O(V)
+
+ROTTING ORANGES:
+Multi-source BFS. Start BFS from all rotten oranges simultaneously.
+Each BFS level = one minute of rotting.
+Time: O(m*n), Space: O(m*n)
+
+WORD LADDER:
+BFS where each node is a word, edges connect words differing by one letter.
+Level = number of transformations.
+Time: O(n * L² * 26) where L = word length, n = number of words
+
+01 BFS:
+For graphs with edge weights 0 and 1 only, use a deque.
+Weight 0 edges: add to front. Weight 1 edges: add to back.
+Time: O(V + E), equivalent to Dijkstra but simpler.
+
+═══════════════════════════════════════════════════════
+PATTERN 2: SLIDING WINDOW WITH DEQUE
+═══════════════════════════════════════════════════════
+
+Use a deque (double-ended queue) to maintain a monotonic structure within a sliding window.
+
+SLIDING WINDOW MAXIMUM:
+Maintain a decreasing deque of indices.
+For each new element:
+  1. Remove indices outside the window from front
+  2. Remove smaller elements from back (they'll never be the max)
+  3. Add current index to back
+  4. Front of deque = index of current window maximum
+Time: O(n), Space: O(k)
+
+Template:
+  deque = []
+  result = []
+  For i from 0 to n-1:
+    // Remove out-of-window elements
+    While deque is not empty and deque.front <= i - k:
+      deque.removeFromFront()
+    // Maintain decreasing order
+    While deque is not empty and arr[deque.back] <= arr[i]:
+      deque.removeFromBack()
+    deque.addToBack(i)
+    // Record answer
+    If i >= k - 1:
+      result.push(arr[deque.front])
+
+═══════════════════════════════════════════════════════
+PATTERN 3: DESIGN PROBLEMS
+═══════════════════════════════════════════════════════
+
+IMPLEMENT STACK USING QUEUES:
+Method 1 (costly push): On push, enqueue to q2. Dequeue all from q1 to q2. Swap q1 and q2.
+Method 2 (costly pop): On pop, dequeue all but last from q1 to q2. Dequeue last. Swap.
+Push: O(n) or O(1) depending on method. Pop: O(1) or O(n).
+
+DESIGN CIRCULAR QUEUE:
+Use a fixed-size array with front and rear pointers.
+rear = (rear + 1) % capacity for enqueue.
+front = (front + 1) % capacity for dequeue.
+Track count or use isFull/isEmpty flags.
+
+DESIGN HIT COUNTER:
+Use a queue to store timestamps. Dequeue timestamps older than 300 seconds.
+getHits(timestamp): remove expired, return queue size.
+
+LRU CACHE:
+Combine a hash map with a doubly-linked list (essentially an ordered deque).
+Map: key → node. List: maintains access order (most recent at tail).
+On access: move node to tail. On capacity exceeded: remove head.
+Get/Put: O(1)
+
+═══════════════════════════════════════════════════════
+PATTERN 4: PRIORITY QUEUE / HEAP
+═══════════════════════════════════════════════════════
+
+A priority queue dequeues elements by priority (min or max). Implemented using a binary heap.
+
+Key Operations:
+- insert(element): O(log n)
+- extractMin/extractMax: O(log n)
+- peek: O(1)
+
+COMMON PRIORITY QUEUE PROBLEMS:
+
+K CLOSEST POINTS TO ORIGIN:
+Use a max-heap of size k. Keep the k smallest distances.
+Time: O(n log k), Space: O(k)
+
+MERGE K SORTED LISTS:
+Use a min-heap of size k. Always extract the smallest, add the next from that list.
+Time: O(n log k) where n = total elements, k = number of lists
+
+TOP K FREQUENT ELEMENTS:
+Count frequencies (hash map), then use a min-heap of size k.
+Or use bucket sort: bucket[freq] = list of elements with that frequency.
+Time: O(n log k) with heap, O(n) with bucket sort
+
+TASK SCHEDULER:
+Use a max-heap to always process the most frequent task.
+Use a cooldown queue to track when tasks become available.
+Time: O(n * log(26)) ≈ O(n)
+
+FIND MEDIAN FROM DATA STREAM:
+Use two heaps: max-heap for lower half, min-heap for upper half.
+Balance: sizes differ by at most 1.
+Median: top of max-heap (odd count) or average of both tops (even count).
+Insert: O(log n), Find median: O(1)
+
+═══════════════════════════════════════════════════════
+SOLUTION TEMPLATES
+═══════════════════════════════════════════════════════
+
+BFS Shortest Path:
+  queue = [[startNode, 0]]  // [node, distance]
+  visited = new Set([startNode])
+  While queue is not empty:
+    [node, dist] = queue.dequeue()
+    If node == target: return dist
+    For each neighbor of node:
+      If neighbor not in visited:
+        visited.add(neighbor)
+        queue.enqueue([neighbor, dist + 1])
+  Return -1  // not reachable
+
+Multi-source BFS:
+  queue = all source nodes
+  visited = set of all sources
+  While queue is not empty:
+    levelSize = queue.length
+    For i from 0 to levelSize-1:
+      node = queue.dequeue()
+      For each neighbor:
+        If not visited:
+          visited.add(neighbor)
+          queue.enqueue(neighbor)
+
+═══════════════════════════════════════════════════════
+COMPLEXITY ANALYSIS
+═══════════════════════════════════════════════════════
+
+Operation              Queue    Priority Queue
+────────────────────────────────────────────────
+Enqueue / Insert       O(1)     O(log n)
+Dequeue / Extract      O(1)     O(log n)
+Peek / Front           O(1)     O(1)
+BFS traversal          O(V+E)   —
+Sliding window deque   O(n)     —
+
+═══════════════════════════════════════════════════════
+TIPS AND COMMON MISTAKES
+═══════════════════════════════════════════════════════
+
+- BFS = Queue. DFS = Stack. This is the fundamental association.
+- In JavaScript, Array.shift() is O(n). For performance-critical BFS, implement a proper queue or use index tracking.
+- For BFS, always mark nodes as visited WHEN ENQUEUING, not when dequeuing. This prevents duplicate work.
+- Multi-source BFS: start with ALL sources in the queue at once (don't run separate BFS from each source).
+- Priority Queue: in JavaScript, there's no built-in heap. Implement one or use a sorted array for small k.
+- For "shortest path" in unweighted graphs, BFS is optimal. Don't use Dijkstra — it's overkill.
+- Circular queue: be careful with the full vs empty condition (they look the same if using just front/rear).
+- Deque problems are rare but high-value. Practice Sliding Window Maximum.

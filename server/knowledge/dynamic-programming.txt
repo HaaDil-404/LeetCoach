@@ -1,0 +1,243 @@
+DYNAMIC PROGRAMMING — Complete Study Guide for Coding Interviews
+
+═══════════════════════════════════════════════════════
+CORE CONCEPTS
+═══════════════════════════════════════════════════════
+
+Dynamic Programming (DP) is an optimization technique that solves complex problems by breaking them into overlapping subproblems, solving each subproblem once, and storing the results to avoid redundant computation.
+
+Two Requirements for DP:
+1. Optimal Substructure: The optimal solution contains optimal solutions to subproblems.
+2. Overlapping Subproblems: The same subproblems are solved multiple times.
+
+Two Approaches:
+1. Top-Down (Memoization): Start from the original problem, recurse into subproblems, cache results.
+2. Bottom-Up (Tabulation): Build solutions from smallest subproblems up to the original.
+
+Bottom-up is generally preferred in interviews (no recursion overhead, easier to optimize space).
+
+The DP Framework:
+1. Define state: What variables uniquely identify a subproblem?
+2. Define transition: How does a state relate to its subproblems?
+3. Define base case: What are the trivial subproblems?
+4. Define answer: Which state gives the final answer?
+5. Optimize space if possible (often from O(n²) to O(n) or O(1)).
+
+═══════════════════════════════════════════════════════
+PATTERN 1: LINEAR DP (1D)
+═══════════════════════════════════════════════════════
+
+State depends on the previous one or few elements.
+
+FIBONACCI NUMBERS:
+  dp[0] = 0, dp[1] = 1
+  For i from 2 to n: dp[i] = dp[i-1] + dp[i-2]
+  Space optimization: only need prev2 and prev1.
+
+CLIMBING STAIRS:
+Same as Fibonacci! dp[i] = dp[i-1] + dp[i-2] (1 step or 2 steps).
+
+HOUSE ROBBER:
+Cannot rob two adjacent houses. Maximize total loot.
+  dp[i] = max(dp[i-1], dp[i-2] + nums[i])
+  Base: dp[0] = nums[0], dp[1] = max(nums[0], nums[1])
+  Space: O(1) — only need last two values.
+
+HOUSE ROBBER II (Circular):
+Run House Robber twice: once excluding first house, once excluding last.
+Answer = max of both runs.
+
+MAXIMUM SUBARRAY (Kadane's):
+  dp[i] = max(nums[i], dp[i-1] + nums[i])
+  Track the global maximum across all dp[i].
+  Space: O(1)
+
+DECODE WAYS:
+  dp[i] = number of ways to decode s[0..i-1]
+  dp[i] += dp[i-1] if s[i-1] is valid (1-9)
+  dp[i] += dp[i-2] if s[i-2..i-1] is valid (10-26)
+
+COIN CHANGE:
+Minimum coins to make amount.
+  dp[0] = 0
+  For amount from 1 to target:
+    For each coin:
+      If coin <= amount:
+        dp[amount] = min(dp[amount], dp[amount - coin] + 1)
+  Time: O(amount * coins), Space: O(amount)
+
+LONGEST INCREASING SUBSEQUENCE:
+  dp[i] = length of LIS ending at index i
+  dp[i] = 1 + max(dp[j] for all j < i where nums[j] < nums[i])
+  Answer = max(dp[i])
+  Time: O(n²). Can be optimized to O(n log n) with binary search + patience sorting.
+
+═══════════════════════════════════════════════════════
+PATTERN 2: TWO-DIMENSIONAL DP
+═══════════════════════════════════════════════════════
+
+State depends on two variables (often indices into two sequences or grid coordinates).
+
+UNIQUE PATHS:
+Robot moves right or down in m×n grid.
+  dp[i][j] = dp[i-1][j] + dp[i][j-1]
+  Base: dp[0][j] = 1, dp[i][0] = 1
+  Space: O(n) using a single row.
+
+MINIMUM PATH SUM:
+  dp[i][j] = grid[i][j] + min(dp[i-1][j], dp[i][j-1])
+
+LONGEST COMMON SUBSEQUENCE (LCS):
+  If s1[i-1] == s2[j-1]:
+    dp[i][j] = dp[i-1][j-1] + 1
+  Else:
+    dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+  Time: O(m*n), Space: O(m*n) → O(min(m,n))
+
+EDIT DISTANCE:
+Minimum operations (insert, delete, replace) to convert s1 to s2.
+  If s1[i-1] == s2[j-1]:
+    dp[i][j] = dp[i-1][j-1]
+  Else:
+    dp[i][j] = 1 + min(dp[i-1][j],      // delete
+                        dp[i][j-1],      // insert
+                        dp[i-1][j-1])    // replace
+  Time: O(m*n), Space: O(m*n) → O(n)
+
+LONGEST PALINDROMIC SUBSEQUENCE:
+LPS(s) = LCS(s, reverse(s))
+Or direct DP:
+  dp[i][j] = length of LPS in s[i..j]
+  If s[i] == s[j]: dp[i][j] = dp[i+1][j-1] + 2
+  Else: dp[i][j] = max(dp[i+1][j], dp[i][j-1])
+
+═══════════════════════════════════════════════════════
+PATTERN 3: KNAPSACK
+═══════════════════════════════════════════════════════
+
+Choose items to maximize value within a weight/capacity constraint.
+
+0/1 KNAPSACK:
+Each item used at most once.
+  dp[i][w] = max value using first i items with capacity w
+  dp[i][w] = max(dp[i-1][w],                           // skip item i
+                  dp[i-1][w - weight[i]] + value[i])     // take item i
+  Space: O(W) using 1D array (iterate W in reverse).
+
+UNBOUNDED KNAPSACK:
+Each item can be used unlimited times.
+  dp[w] = max value with capacity w
+  For w from 1 to W:
+    For each item:
+      If weight[item] <= w:
+        dp[w] = max(dp[w], dp[w - weight[item]] + value[item])
+
+SUBSET SUM:
+Can you form a target sum from a subset?
+  dp[s] = true/false — can we form sum s?
+  dp[0] = true
+  For each num: for s from target down to num: dp[s] = dp[s] or dp[s - num]
+
+PARTITION EQUAL SUBSET SUM:
+Can we partition array into two subsets with equal sum?
+Equivalent to: can we find a subset with sum = totalSum / 2?
+Reduce to Subset Sum.
+
+COIN CHANGE II (Count Ways):
+  dp[0] = 1 (one way to make 0: use no coins)
+  For each coin:
+    For amount from coin to target:
+      dp[amount] += dp[amount - coin]
+
+═══════════════════════════════════════════════════════
+PATTERN 4: INTERVAL DP
+═══════════════════════════════════════════════════════
+
+Solve subproblems on intervals [i, j] of the input.
+
+LONGEST PALINDROMIC SUBSTRING:
+  dp[i][j] = true if s[i..j] is a palindrome
+  dp[i][j] = (s[i] == s[j]) and dp[i+1][j-1]
+  Expand from center approach is often simpler: O(n²) time, O(1) space.
+
+BURST BALLOONS:
+  dp[i][j] = max coins from bursting balloons between i and j
+  For each k in [i, j]: try bursting k last.
+  dp[i][j] = max(dp[i][k-1] + dp[k+1][j] + nums[i-1]*nums[k]*nums[j+1])
+
+MATRIX CHAIN MULTIPLICATION:
+  dp[i][j] = minimum multiplications for matrices i through j
+  For each split point k:
+    dp[i][j] = min(dp[i][k] + dp[k+1][j] + cost(i,k,j))
+
+═══════════════════════════════════════════════════════
+PATTERN 5: STATE MACHINE DP
+═══════════════════════════════════════════════════════
+
+Model the problem as transitions between states.
+
+BEST TIME TO BUY AND SELL STOCK WITH COOLDOWN:
+States: holding, not_holding_cooldown, not_holding_ready
+  holding[i] = max(holding[i-1], ready[i-1] - prices[i])
+  cooldown[i] = holding[i-1] + prices[i]
+  ready[i] = max(ready[i-1], cooldown[i-1])
+
+BEST TIME TO BUY AND SELL STOCK WITH K TRANSACTIONS:
+  dp[k][i] = max profit using at most k transactions up to day i
+  dp[k][i] = max(dp[k][i-1], prices[i] - prices[j] + dp[k-1][j-1]) for all j < i
+  Optimized with running max.
+
+═══════════════════════════════════════════════════════
+SOLUTION TEMPLATES
+═══════════════════════════════════════════════════════
+
+Top-Down (Memoization):
+  memo = {}
+  function dp(state):
+    if state in memo: return memo[state]
+    if base case: return base_value
+    result = recurrence(dp(subproblems))
+    memo[state] = result
+    return result
+
+Bottom-Up (Tabulation):
+  Create dp table with base cases filled
+  For each state in topological order:
+    dp[state] = recurrence using previously computed states
+  Return dp[final_state]
+
+Space Optimization (2D → 1D):
+  When dp[i][j] depends only on row i-1:
+  Use two 1D arrays (prev[] and curr[]) or one array (iterate in correct direction)
+
+═══════════════════════════════════════════════════════
+COMPLEXITY ANALYSIS
+═══════════════════════════════════════════════════════
+
+Problem                    Time          Space
+──────────────────────────────────────────────────
+Fibonacci/Climbing         O(n)          O(1)
+House Robber               O(n)          O(1)
+Coin Change                O(n*W)        O(W)
+LIS                        O(n²)         O(n)
+LIS (optimized)            O(n log n)    O(n)
+LCS                        O(m*n)        O(min(m,n))
+Edit Distance              O(m*n)        O(n)
+0/1 Knapsack               O(n*W)        O(W)
+Unique Paths               O(m*n)        O(n)
+
+═══════════════════════════════════════════════════════
+TIPS AND COMMON MISTAKES
+═══════════════════════════════════════════════════════
+
+- Start by writing the brute-force recursive solution, then add memoization.
+- To identify DP: ask "Can I break this into smaller subproblems that overlap?"
+- Common DP signals: "minimum/maximum," "count the number of ways," "is it possible"
+- Define your state clearly. If you can't explain what dp[i] represents, your solution will be wrong.
+- Off-by-one errors are the #1 DP bug. Be very careful with loop bounds and base cases.
+- For space optimization: when dp[i] depends only on dp[i-1], use two variables or a rolling array.
+- 0/1 Knapsack: iterate capacity in REVERSE (to avoid using the same item twice).
+- Unbounded Knapsack: iterate capacity FORWARD.
+- When stuck: draw a small example, fill in the DP table by hand, then generalize.
+- Top-down is easier to code correctly; bottom-up is more efficient.
+- Don't be afraid of 2D DP — many classic problems need it.

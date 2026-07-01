@@ -1,0 +1,169 @@
+TWO POINTERS — Complete Study Guide for Coding Interviews
+
+═══════════════════════════════════════════════════════
+CORE CONCEPTS
+═══════════════════════════════════════════════════════
+
+The Two Pointers technique uses two references (indices or actual pointers) to traverse a data structure, typically an array or linked list. By moving the pointers strategically, you can solve problems in O(n) time that would otherwise require O(n²).
+
+When to Use Two Pointers:
+- The input is sorted (or can be sorted without affecting the answer)
+- You need to find pairs, triplets, or subarrays with certain properties
+- You need to compare elements from both ends of a sequence
+- You need to merge or partition elements in-place
+- The problem involves a "left" and "right" boundary
+
+Main Variants:
+1. Opposite Direction: Start from both ends, move toward center
+2. Same Direction (Fast/Slow): Both start from the beginning, move at different speeds
+3. Two Arrays: One pointer per array, advance based on comparison
+
+═══════════════════════════════════════════════════════
+PATTERN 1: OPPOSITE DIRECTION
+═══════════════════════════════════════════════════════
+
+Setup: left = 0, right = n - 1
+Movement: Move left forward or right backward based on a condition
+Termination: left >= right
+
+Classic Problems:
+
+TWO SUM II (sorted array):
+Given a sorted array, find two numbers that add up to target.
+If sum < target: move left pointer right (need larger value)
+If sum > target: move right pointer left (need smaller value)
+If sum == target: found the pair
+Time: O(n), Space: O(1)
+
+CONTAINER WITH MOST WATER:
+Array of heights represents walls. Find two walls that form the largest container.
+Area = min(height[left], height[right]) * (right - left)
+Move the pointer pointing to the shorter wall (greedy: keeping the shorter wall can only decrease area).
+Time: O(n), Space: O(1)
+
+VALID PALINDROME:
+Compare characters from both ends, skip non-alphanumeric characters.
+If left char != right char: not a palindrome
+Move both pointers inward on match.
+Time: O(n), Space: O(1)
+
+3SUM:
+Sort the array. Fix one element, then use two pointers on the remaining subarray to find pairs that sum to -fixed.
+Skip duplicates by advancing past repeated values.
+Time: O(n²), Space: O(1) (excluding output)
+
+TRAPPING RAIN WATER:
+Track leftMax and rightMax. Process from the side with the smaller max.
+Water at position = min(leftMax, rightMax) - height[position]
+Time: O(n), Space: O(1)
+
+═══════════════════════════════════════════════════════
+PATTERN 2: SAME DIRECTION (FAST/SLOW)
+═══════════════════════════════════════════════════════
+
+Setup: slow = 0, fast = 0 (or fast = 1)
+Movement: Fast pointer moves every step, slow pointer moves conditionally
+Use case: In-place array modifications, partitioning
+
+REMOVE DUPLICATES FROM SORTED ARRAY:
+slow tracks the write position, fast scans ahead.
+If nums[fast] != nums[slow]: increment slow, copy nums[fast] to nums[slow].
+Returns slow + 1 (new length).
+Time: O(n), Space: O(1)
+
+MOVE ZEROES:
+slow tracks the position for next non-zero element.
+When fast finds a non-zero: swap nums[slow] and nums[fast], increment slow.
+Time: O(n), Space: O(1)
+
+REMOVE ELEMENT:
+Similar to Move Zeroes but removes a specific value.
+When nums[fast] != val: copy to slow position, increment slow.
+Time: O(n), Space: O(1)
+
+SORT COLORS (Dutch National Flag):
+Three pointers: low, mid, high.
+0s go to [0, low), 1s in [low, high], 2s in (high, n).
+Swap elements based on value at mid pointer.
+Time: O(n), Space: O(1)
+
+═══════════════════════════════════════════════════════
+PATTERN 3: TWO ARRAYS
+═══════════════════════════════════════════════════════
+
+Setup: i = 0 (pointer for array A), j = 0 (pointer for array B)
+Movement: Advance the pointer pointing to the smaller element
+Use case: Merging sorted arrays, finding intersections
+
+MERGE SORTED ARRAYS:
+Compare A[i] and B[j], pick the smaller one.
+After one array is exhausted, append the remaining elements of the other.
+Time: O(n + m), Space: O(n + m) for result
+
+INTERSECTION OF TWO SORTED ARRAYS:
+If A[i] == B[j]: add to result, advance both.
+If A[i] < B[j]: advance i.
+If A[i] > B[j]: advance j.
+Time: O(n + m), Space: O(min(n, m))
+
+═══════════════════════════════════════════════════════
+SOLUTION TEMPLATES
+═══════════════════════════════════════════════════════
+
+Opposite Direction (Pair Sum):
+  Sort array (if not already sorted)
+  left = 0, right = n - 1
+  While left < right:
+    sum = arr[left] + arr[right]
+    If sum == target: return [left, right]
+    Else if sum < target: left++
+    Else: right--
+
+Fast/Slow (Remove Duplicates):
+  If array is empty: return 0
+  slow = 0
+  For fast from 1 to n-1:
+    If arr[fast] != arr[slow]:
+      slow++
+      arr[slow] = arr[fast]
+  Return slow + 1
+
+3Sum Template:
+  Sort array
+  For i from 0 to n-3:
+    If i > 0 and arr[i] == arr[i-1]: continue  // skip duplicates
+    left = i + 1, right = n - 1
+    While left < right:
+      sum = arr[i] + arr[left] + arr[right]
+      If sum == 0:
+        Add [arr[i], arr[left], arr[right]] to result
+        While left < right and arr[left] == arr[left+1]: left++
+        While left < right and arr[right] == arr[right-1]: right--
+        left++, right--
+      Else if sum < 0: left++
+      Else: right--
+
+═══════════════════════════════════════════════════════
+COMPLEXITY ANALYSIS
+═══════════════════════════════════════════════════════
+
+Pattern                  Time          Space
+──────────────────────────────────────────────────────
+Opposite direction       O(n)          O(1)
+Fast/slow (same dir)     O(n)          O(1)
+Two arrays merge         O(n + m)      O(n + m)
+3Sum (with sorting)      O(n²)         O(1)
+4Sum                     O(n³)         O(1)
+
+═══════════════════════════════════════════════════════
+TIPS AND COMMON MISTAKES
+═══════════════════════════════════════════════════════
+
+- Two pointers usually requires the array to be SORTED. If it's not, sort it first (adds O(n log n)).
+- Don't forget to handle duplicates! In problems like 3Sum, skip duplicate values to avoid duplicate triplets.
+- The "while left < right" condition is crucial — using "<=" can cause infinite loops or wrong answers.
+- For fast/slow pointer: make sure slow doesn't go past fast.
+- When the problem says "in-place" and "O(1) space," two pointers is almost always the answer.
+- Two pointers reduces O(n²) brute force to O(n) for sorted data.
+- For linked list cycle detection, use fast (2 steps) and slow (1 step) pointers — Floyd's algorithm.
+- When stuck, ask: "Can I sort this? Would two pointers help after sorting?"

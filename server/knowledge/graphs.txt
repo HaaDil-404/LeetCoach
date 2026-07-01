@@ -1,0 +1,227 @@
+GRAPHS — Complete Study Guide for Coding Interviews
+
+═══════════════════════════════════════════════════════
+CORE CONCEPTS
+═══════════════════════════════════════════════════════
+
+A Graph is a collection of nodes (vertices) connected by edges. Graphs model relationships: social networks, roads, dependencies, state machines.
+
+Graph Types:
+- Directed vs Undirected: Edges have direction or not
+- Weighted vs Unweighted: Edges have costs/weights or not
+- Cyclic vs Acyclic: Contains cycles or not
+- Connected vs Disconnected: All vertices reachable from any vertex or not
+- DAG: Directed Acyclic Graph — key for topological sort
+
+Representations:
+1. Adjacency List: graph[node] = list of neighbors. Space: O(V + E). Best for sparse graphs.
+2. Adjacency Matrix: matrix[i][j] = 1 if edge exists. Space: O(V²). Best for dense graphs.
+3. Edge List: List of (u, v, weight) tuples. Space: O(E). Used in Kruskal's algorithm.
+
+═══════════════════════════════════════════════════════
+PATTERN 1: BFS (Breadth-First Search)
+═══════════════════════════════════════════════════════
+
+Explores nodes level by level. Uses a queue. Finds shortest path in unweighted graphs.
+
+Template:
+  function bfs(graph, start):
+    queue = [start]
+    visited = new Set([start])
+    While queue is not empty:
+      node = queue.dequeue()
+      process(node)
+      For each neighbor of graph[node]:
+        If neighbor not in visited:
+          visited.add(neighbor)
+          queue.enqueue(neighbor)
+
+SHORTEST PATH (unweighted):
+BFS level = shortest distance from source. First time reaching a node = shortest path.
+
+MULTI-SOURCE BFS:
+Initialize queue with ALL sources. Useful for: Rotting Oranges, 01 Matrix, Walls and Gates.
+Each source expands simultaneously — like ripples in a pond.
+
+═══════════════════════════════════════════════════════
+PATTERN 2: DFS (Depth-First Search)
+═══════════════════════════════════════════════════════
+
+Explores as deep as possible before backtracking. Uses recursion or explicit stack.
+
+Template (recursive):
+  function dfs(graph, node, visited):
+    visited.add(node)
+    process(node)
+    For each neighbor of graph[node]:
+      If neighbor not in visited:
+        dfs(graph, neighbor, visited)
+
+Template (iterative):
+  function dfs(graph, start):
+    stack = [start]
+    visited = new Set()
+    While stack is not empty:
+      node = stack.pop()
+      If node in visited: continue
+      visited.add(node)
+      process(node)
+      For each neighbor of graph[node]:
+        If neighbor not in visited:
+          stack.push(neighbor)
+
+Use DFS for:
+- Path finding (is there a path from A to B?)
+- Connected components
+- Cycle detection
+- Topological sort
+- Backtracking (all paths, all permutations)
+
+═══════════════════════════════════════════════════════
+PATTERN 3: TOPOLOGICAL SORT
+═══════════════════════════════════════════════════════
+
+Linear ordering of vertices in a DAG such that for every edge u → v, u comes before v. Used for dependency resolution.
+
+KAHN'S ALGORITHM (BFS-based):
+1. Compute in-degree of every node
+2. Add all nodes with in-degree 0 to queue
+3. Process queue: dequeue node, reduce in-degree of neighbors
+4. If any neighbor's in-degree becomes 0, add to queue
+5. If all nodes processed: valid topological order. Otherwise: cycle exists.
+
+Template:
+  indegree = compute in-degrees
+  queue = all nodes with indegree[node] == 0
+  order = []
+  While queue is not empty:
+    node = queue.dequeue()
+    order.push(node)
+    For each neighbor of node:
+      indegree[neighbor]--
+      If indegree[neighbor] == 0:
+        queue.enqueue(neighbor)
+  If order.length == V: return order  // valid
+  Else: cycle detected!
+
+DFS-based Topological Sort:
+Process nodes in reverse post-order (add to result AFTER processing all descendants).
+Use a visited set and a recursion stack (for cycle detection).
+
+Example problems: Course Schedule, Alien Dictionary, Build Order.
+
+═══════════════════════════════════════════════════════
+PATTERN 4: UNION-FIND (Disjoint Set)
+═══════════════════════════════════════════════════════
+
+Efficiently tracks connected components. Supports:
+- find(x): Which component does x belong to?
+- union(x, y): Merge components of x and y.
+
+With path compression + union by rank: nearly O(1) per operation (amortized).
+
+Template:
+  parent = [0, 1, 2, ..., n-1]  // each node is its own parent
+  rank = [0, 0, ..., 0]
+
+  function find(x):
+    if parent[x] != x:
+      parent[x] = find(parent[x])  // path compression
+    return parent[x]
+
+  function union(x, y):
+    rootX = find(x), rootY = find(y)
+    if rootX == rootY: return false  // already connected
+    if rank[rootX] < rank[rootY]: parent[rootX] = rootY
+    elif rank[rootX] > rank[rootY]: parent[rootY] = rootX
+    else: parent[rootY] = rootX; rank[rootX]++
+    return true
+
+Example problems: Number of Connected Components, Redundant Connection, Accounts Merge, Number of Islands (alternative to DFS).
+
+═══════════════════════════════════════════════════════
+PATTERN 5: SHORTEST PATH ALGORITHMS
+═══════════════════════════════════════════════════════
+
+DIJKSTRA'S ALGORITHM (non-negative weights):
+Uses a min-heap (priority queue).
+  dist = {start: 0, all others: Infinity}
+  heap = [(0, start)]
+  While heap is not empty:
+    (d, node) = heap.extractMin()
+    If d > dist[node]: continue  // stale entry
+    For each (neighbor, weight) of graph[node]:
+      newDist = d + weight
+      If newDist < dist[neighbor]:
+        dist[neighbor] = newDist
+        heap.insert((newDist, neighbor))
+Time: O((V + E) log V)
+
+BELLMAN-FORD (handles negative weights):
+Relax all edges V-1 times.
+  dist = {start: 0, all others: Infinity}
+  For i from 1 to V-1:
+    For each edge (u, v, w):
+      If dist[u] + w < dist[v]:
+        dist[v] = dist[u] + w
+  // One more pass to detect negative cycles
+Time: O(V * E)
+
+FLOYD-WARSHALL (all pairs shortest path):
+  For k from 0 to V-1:
+    For i from 0 to V-1:
+      For j from 0 to V-1:
+        dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j])
+Time: O(V³)
+
+═══════════════════════════════════════════════════════
+PATTERN 6: GRID AS GRAPH
+═══════════════════════════════════════════════════════
+
+Many interview problems use a 2D grid as an implicit graph.
+- Each cell is a node
+- Adjacent cells (up, down, left, right) are neighbors
+- directions = [(0,1), (0,-1), (1,0), (-1,0)]
+
+NUMBER OF ISLANDS:
+DFS/BFS from each unvisited '1'. Each DFS/BFS call = one island.
+Mark visited cells to avoid revisiting.
+Time: O(m*n)
+
+SHORTEST PATH IN GRID:
+BFS from source. Each level = one step.
+
+SURROUNDED REGIONS:
+DFS/BFS from border 'O's to mark safe cells. Remaining 'O's are surrounded.
+
+PACIFIC ATLANTIC WATER FLOW:
+DFS/BFS from both ocean borders. Find cells reachable from both.
+
+═══════════════════════════════════════════════════════
+COMPLEXITY ANALYSIS
+═══════════════════════════════════════════════════════
+
+Algorithm                Time              Space
+────────────────────────────────────────────────────
+BFS                      O(V + E)          O(V)
+DFS                      O(V + E)          O(V)
+Topological Sort         O(V + E)          O(V)
+Union-Find (amortized)   O(α(n)) ≈ O(1)   O(V)
+Dijkstra                 O((V+E) log V)    O(V)
+Bellman-Ford             O(V * E)          O(V)
+Floyd-Warshall           O(V³)             O(V²)
+
+═══════════════════════════════════════════════════════
+TIPS AND COMMON MISTAKES
+═══════════════════════════════════════════════════════
+
+- Build the adjacency list from the edge list before doing BFS/DFS.
+- For undirected graphs, add edges in both directions.
+- Always use a visited set to avoid infinite loops in cyclic graphs.
+- For grid problems, check bounds before accessing neighbors.
+- BFS = shortest path in unweighted. Dijkstra = shortest path in weighted (non-negative).
+- For "can I reach X from Y" → simple BFS/DFS. For "what's the shortest path" → BFS (unweighted) or Dijkstra (weighted).
+- Topological sort only works on DAGs. If you detect a cycle, the answer is "impossible."
+- Union-Find is ideal for dynamic connectivity (edges being added over time).
+- For problems asking "number of connected components," consider both DFS and Union-Find.
+- Back edges in DFS indicate cycles. In directed graphs, use a recursion stack (not just visited).

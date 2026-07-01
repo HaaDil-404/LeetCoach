@@ -1,0 +1,176 @@
+SLIDING WINDOW — Complete Study Guide for Coding Interviews
+
+═══════════════════════════════════════════════════════
+CORE CONCEPTS
+═══════════════════════════════════════════════════════
+
+The Sliding Window technique maintains a "window" over a contiguous portion of an array or string, expanding and shrinking it to find optimal solutions. It converts brute-force O(n²) or O(n³) approaches into O(n).
+
+Key Insight: Instead of recalculating everything from scratch when the window moves, update the result incrementally by adding the new element entering the window and removing the element leaving it.
+
+When to Use Sliding Window:
+- Problem involves contiguous subarrays or substrings
+- You need to find min/max length, sum, or count
+- There's a constraint on the window (sum ≤ k, at most k distinct characters, etc.)
+- Keywords: "contiguous," "substring," "subarray," "window," "consecutive"
+
+Two Types:
+1. Fixed-Size Window: Window size is given (e.g., max sum of subarray of size k)
+2. Variable-Size Window: Window size changes dynamically based on constraints
+
+═══════════════════════════════════════════════════════
+PATTERN 1: FIXED-SIZE WINDOW
+═══════════════════════════════════════════════════════
+
+The window size k is fixed. Slide the window one position at a time.
+
+MAXIMUM SUM SUBARRAY OF SIZE K:
+Compute the sum of the first k elements.
+Slide: add the incoming element, subtract the outgoing element.
+Track the maximum sum seen.
+Time: O(n), Space: O(1)
+
+Template:
+  windowSum = sum of first k elements
+  maxSum = windowSum
+  For i from k to n-1:
+    windowSum += arr[i] - arr[i - k]
+    maxSum = max(maxSum, windowSum)
+  Return maxSum
+
+FIND ALL ANAGRAMS IN A STRING:
+Fixed window of size = pattern length.
+Use frequency maps: compare window frequency with pattern frequency.
+Optimization: track "matches" count instead of comparing entire maps.
+Time: O(n), Space: O(1) — alphabet is fixed size
+
+MAXIMUM OF ALL SUBARRAYS OF SIZE K (Sliding Window Maximum):
+Use a deque (monotonic decreasing) to track candidates for maximum.
+Remove indices outside the window. Remove smaller elements from the back.
+Time: O(n), Space: O(k)
+
+═══════════════════════════════════════════════════════
+PATTERN 2: VARIABLE-SIZE WINDOW
+═══════════════════════════════════════════════════════
+
+The window expands (right pointer moves right) and shrinks (left pointer moves right) based on a condition.
+
+General Template:
+  left = 0
+  For right from 0 to n-1:
+    // Expand: add arr[right] to window state
+    While window is invalid:
+      // Shrink: remove arr[left] from window state
+      left++
+    // Update answer with current valid window
+
+LONGEST SUBSTRING WITHOUT REPEATING CHARACTERS:
+Use a hash set or hash map to track characters in the window.
+When a duplicate is found, shrink from the left until no duplicates remain.
+Answer: max(right - left + 1) across all valid windows.
+Time: O(n), Space: O(min(n, alphabet_size))
+
+MINIMUM WINDOW SUBSTRING:
+Find the smallest substring of s that contains all characters of t.
+Use two frequency maps. Expand right to include characters. When all of t is covered, shrink from left.
+Track the minimum window length and starting index.
+Time: O(n + m), Space: O(m)
+
+LONGEST SUBSTRING WITH AT MOST K DISTINCT CHARACTERS:
+Use a hash map to count distinct characters in the window.
+When distinct count > k, shrink from the left.
+Answer: max window size when distinct count ≤ k.
+Time: O(n), Space: O(k)
+
+MINIMUM SIZE SUBARRAY SUM:
+Find the smallest subarray with sum ≥ target.
+Expand right, adding elements to windowSum.
+When windowSum ≥ target, record the length and shrink from left.
+Time: O(n), Space: O(1)
+
+MAXIMUM CONSECUTIVE ONES III:
+Given a binary array, find the longest subarray of 1s after flipping at most k 0s.
+Window tracks the number of 0s. When zeros > k, shrink from left.
+Time: O(n), Space: O(1)
+
+═══════════════════════════════════════════════════════
+SOLUTION TEMPLATES
+═══════════════════════════════════════════════════════
+
+Variable Window — Find Longest:
+  left = 0, result = 0
+  For right from 0 to n-1:
+    Update window state with arr[right]
+    While window is INVALID:
+      Remove arr[left] from window state
+      left++
+    result = max(result, right - left + 1)
+  Return result
+
+Variable Window — Find Shortest:
+  left = 0, result = Infinity
+  For right from 0 to n-1:
+    Update window state with arr[right]
+    While window is VALID:
+      result = min(result, right - left + 1)
+      Remove arr[left] from window state
+      left++
+  Return result (or 0 if result is Infinity)
+
+Variable Window — Count Valid:
+  left = 0, count = 0
+  For right from 0 to n-1:
+    Update window state with arr[right]
+    While window is INVALID:
+      Remove arr[left] from window state
+      left++
+    count += right - left + 1  // all subarrays ending at right
+  Return count
+
+═══════════════════════════════════════════════════════
+COMMON PROBLEM TYPES
+═══════════════════════════════════════════════════════
+
+Category: Maximum/Minimum Length
+- Longest Substring Without Repeating Characters
+- Minimum Window Substring
+- Minimum Size Subarray Sum
+- Longest Substring with At Most K Distinct Characters
+
+Category: Count
+- Subarrays with K Different Integers
+- Count Number of Nice Subarrays
+- Number of Subarrays with Bounded Maximum
+
+Category: Fixed Window
+- Maximum Sum Subarray of Size K
+- Find All Anagrams in a String
+- Sliding Window Maximum
+- Permutation in String
+
+═══════════════════════════════════════════════════════
+COMPLEXITY ANALYSIS
+═══════════════════════════════════════════════════════
+
+Despite having nested loops (the while inside the for), sliding window is O(n) because each element is added and removed from the window at most once. The left pointer only moves forward, and across all iterations, it moves at most n times total.
+
+Pattern                    Time      Space
+───────────────────────────────────────────
+Fixed window               O(n)      O(1) or O(k)
+Variable window (longest)  O(n)      O(k) for hash map
+Variable window (shortest) O(n)      O(k) for hash map
+With deque (max/min)       O(n)      O(k)
+
+═══════════════════════════════════════════════════════
+TIPS AND COMMON MISTAKES
+═══════════════════════════════════════════════════════
+
+- The key is identifying what makes a window "valid" vs "invalid."
+- For "longest" problems: expand until invalid, then shrink.
+- For "shortest" problems: expand until valid, then shrink while still valid.
+- Don't confuse sliding window with two pointers. Sliding window is specifically for contiguous subarrays/substrings.
+- When using a hash map in the window, remember to DELETE keys when their count drops to 0 (don't just decrement).
+- Fixed-size windows are simpler — just slide one step at a time.
+- The "exactly K" trick: atMost(k) - atMost(k-1) = exactly(k). Useful for counting problems.
+- Always verify your window update logic handles the first k elements correctly.
+- Edge case: empty input, window larger than array, all elements the same.
