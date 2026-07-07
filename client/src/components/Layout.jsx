@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
   Swords,
@@ -31,56 +31,54 @@ export default function Layout() {
   };
 
   return (
-    <div className="min-h-screen bg-bg-primary bg-grid">
-      {/* ── Sidebar (Desktop) ── */}
-      <aside className="fixed left-0 top-0 h-full w-[72px] hidden lg:flex flex-col items-center py-6 z-50 border-r border-border bg-bg-card/80 backdrop-blur-xl">
+    <div className="app-layout bg-grid">
+      {/* ── Desktop / Tablet Sidebar ── */}
+      <aside className="app-sidebar hidden md:flex">
         {/* Logo */}
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          className="mb-10"
-        >
-          <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center glow-accent-sm">
+        <div className="sidebar-logo">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            className="sidebar-logo-icon glow-accent-sm"
+          >
             <Code2 className="w-5 h-5 text-accent" />
-          </div>
-        </motion.div>
+          </motion.div>
+          <span className="sidebar-logo-text">LeetCoach</span>
+        </div>
 
         {/* Nav Items */}
-        <nav className="flex-1 flex flex-col items-center gap-2">
+        <nav className="sidebar-nav">
           {navItems.map(({ to, icon: Icon, label }) => (
-            <NavLink key={to} to={to} title={label}>
-              {({ isActive }) => (
-                <motion.div
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-200 ${
-                    isActive
-                      ? "bg-accent text-bg-primary shadow-lg shadow-accent/30"
-                      : "text-text-muted hover:text-text-primary hover:bg-white/5"
-                  }`}
-                >
-                  <Icon className="w-5 h-5" />
-                </motion.div>
-              )}
+            <NavLink
+              key={to}
+              to={to}
+              title={label}
+              className={({ isActive }) =>
+                `sidebar-nav-item ${isActive ? "active" : ""}`
+              }
+            >
+              <Icon className="nav-icon" />
+              <span className="nav-label">{label}</span>
             </NavLink>
           ))}
         </nav>
 
         {/* Logout */}
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={handleLogout}
-          className="w-11 h-11 rounded-xl flex items-center justify-center text-text-muted hover:text-hard hover:bg-hard/10 transition-all cursor-pointer"
-          title="Logout"
-        >
-          <LogOut className="w-5 h-5" />
-        </motion.button>
+        <div className="sidebar-footer">
+          <button
+            onClick={handleLogout}
+            className="sidebar-nav-item w-full text-text-muted hover:text-hard hover:bg-hard/10 cursor-pointer"
+            title="Logout"
+          >
+            <LogOut className="nav-icon" />
+            <span className="nav-label">Logout</span>
+          </button>
+        </div>
       </aside>
 
-      {/* ── Top Bar (Mobile) ── */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 h-16 z-50 flex items-center justify-between px-4 border-b border-border bg-bg-card/90 backdrop-blur-xl">
+      {/* ── Mobile Header ── */}
+      <header className="mobile-header md:hidden">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
             <Code2 className="w-4 h-4 text-accent" />
@@ -91,52 +89,78 @@ export default function Layout() {
         </div>
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="w-9 h-9 rounded-lg flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-white/5 transition-colors"
+          className="w-9 h-9 rounded-lg flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-white/5 transition-colors cursor-pointer"
+          aria-label={mobileOpen ? "Close menu" : "Open menu"}
         >
           {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
       </header>
 
-      {/* ── Mobile Nav Drawer ── */}
-      {mobileOpen && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          className="lg:hidden fixed top-16 left-0 right-0 z-40 border-b border-border bg-bg-card/95 backdrop-blur-xl"
-        >
-          <nav className="p-4 flex flex-col gap-1">
-            {navItems.map(({ to, icon: Icon, label }) => (
-              <NavLink
-                key={to}
-                to={to}
-                onClick={() => setMobileOpen(false)}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                    isActive
-                      ? "bg-accent text-bg-primary font-medium"
-                      : "text-text-secondary hover:text-text-primary hover:bg-white/5"
-                  }`
-                }
-              >
-                <Icon className="w-5 h-5" />
-                <span className="text-sm">{label}</span>
-              </NavLink>
-            ))}
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-text-secondary hover:text-hard hover:bg-hard/10 transition-all mt-2 cursor-pointer"
+      {/* ── Mobile Drawer ── */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="drawer-overlay md:hidden"
+              onClick={() => setMobileOpen(false)}
+            />
+
+            {/* Panel */}
+            <motion.div
+              initial={{ x: -280 }}
+              animate={{ x: 0 }}
+              exit={{ x: -280 }}
+              transition={{ type: "spring", stiffness: 400, damping: 35 }}
+              className="drawer-panel md:hidden"
             >
-              <LogOut className="w-5 h-5" />
-              <span className="text-sm">Logout</span>
-            </button>
-          </nav>
-        </motion.div>
-      )}
+              {/* Drawer Logo */}
+              <div className="sidebar-logo">
+                <div className="sidebar-logo-icon glow-accent-sm">
+                  <Code2 className="w-5 h-5 text-accent" />
+                </div>
+                <span className="sidebar-logo-text">LeetCoach</span>
+              </div>
+
+              {/* Drawer Nav */}
+              <nav className="sidebar-nav">
+                {navItems.map(({ to, icon: Icon, label }) => (
+                  <NavLink
+                    key={to}
+                    to={to}
+                    onClick={() => setMobileOpen(false)}
+                    className={({ isActive }) =>
+                      `sidebar-nav-item ${isActive ? "active" : ""}`
+                    }
+                  >
+                    <Icon className="nav-icon" />
+                    <span className="nav-label">{label}</span>
+                  </NavLink>
+                ))}
+              </nav>
+
+              {/* Drawer Logout */}
+              <div className="sidebar-footer">
+                <button
+                  onClick={handleLogout}
+                  className="sidebar-nav-item w-full text-text-muted hover:text-hard hover:bg-hard/10 cursor-pointer"
+                >
+                  <LogOut className="nav-icon" />
+                  <span className="nav-label">Logout</span>
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* ── Main Content ── */}
-      <main className="lg:ml-[72px] pt-16 lg:pt-0 min-h-screen">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="app-main">
+        <div className="app-main-inner">
           <Outlet />
         </div>
       </main>

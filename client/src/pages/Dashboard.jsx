@@ -83,7 +83,7 @@ export default function Dashboard() {
       transition={{ duration: 0.4 }}
     >
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-10">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -95,7 +95,7 @@ export default function Dashboard() {
               Dashboard
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">
+          <h1 className="text-text-primary">
             Welcome back,{" "}
             <span className="gradient-text">{user?.name?.split(" ")[0]}</span>
           </h1>
@@ -106,7 +106,7 @@ export default function Dashboard() {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
         {stats.map((stat, i) => (
           <motion.div
             key={stat.label}
@@ -115,7 +115,7 @@ export default function Dashboard() {
             initial="hidden"
             animate="visible"
             whileHover={{ y: -4, transition: { duration: 0.2 } }}
-            className={`glass-card p-5 group cursor-default hover:shadow-lg ${stat.glow} transition-shadow`}
+            className={`glass-card p-6 group cursor-default hover:shadow-lg ${stat.glow} transition-shadow`}
           >
             <div className="flex items-start justify-between mb-4">
               <div
@@ -138,7 +138,7 @@ export default function Dashboard() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5, duration: 0.5 }}
-        className="glass-card p-6 mb-8"
+        className="glass-card p-6 mb-10"
       >
         <div className="flex items-center justify-between mb-4">
           <div>
@@ -187,6 +187,7 @@ export default function Dashboard() {
         </div>
       </motion.div>
 
+      {/* Quick Actions */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -199,7 +200,7 @@ export default function Dashboard() {
           onClick={() => navigate("/challenges")}
           className="glass-card p-6 flex items-center gap-4 group cursor-pointer text-left hover:border-accent/20 transition-colors"
         >
-          <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+          <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
             <Swords className="w-6 h-6 text-accent" />
           </div>
           <div>
@@ -218,7 +219,7 @@ export default function Dashboard() {
           onClick={() => navigate("/ai")}
           className="glass-card p-6 flex items-center gap-4 group cursor-pointer text-left hover:border-medium/20 transition-colors"
         >
-          <div className="w-12 h-12 rounded-xl bg-medium/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+          <div className="w-12 h-12 rounded-xl bg-medium/10 flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
             <BrainCircuit className="w-6 h-6 text-medium" />
           </div>
           <div>
@@ -237,7 +238,7 @@ export default function Dashboard() {
           onClick={() => navigate("/profile")}
           className="glass-card p-6 flex items-center gap-4 group cursor-pointer text-left hover:border-easy/20 transition-colors"
         >
-          <div className="w-12 h-12 rounded-xl bg-easy/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+          <div className="w-12 h-12 rounded-xl bg-easy/10 flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
             <TrendingUp className="w-6 h-6 text-easy" />
           </div>
           <div>

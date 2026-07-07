@@ -52,8 +52,8 @@ export default function Login() {
         </motion.div>
 
         {/* Card */}
-        <div className="glass-card p-10">
-          <div className="text-center mb-10">
+        <div className="glass-card p-8">
+          <div className="text-center mb-8">
             <h2 className="text-xl font-semibold text-text-primary mb-2">
               Welcome Back
             </h2>
@@ -82,7 +82,7 @@ export default function Login() {
                 Email
               </label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+
                 <input
                   id="login-email"
                   type="email"
@@ -91,7 +91,7 @@ export default function Login() {
                   onChange={(e) =>
                     setForm({ ...form, email: e.target.value })
                   }
-                  className="w-full pl-11 pr-4 py-3.5 rounded-xl bg-bg-input border border-white/10 text-text-primary text-sm placeholder:text-text-muted focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20 transition-all"
+                  className="w-full pl-11 pr-4 py-3.5 rounded-xl bg-bg-input border border-border text-text-primary text-sm placeholder:text-text-muted focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20 transition-all"
                   placeholder="you@example.com"
                 />
               </div>
@@ -106,7 +106,7 @@ export default function Login() {
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+
                 <input
                   id="login-password"
                   type="password"
@@ -115,7 +115,7 @@ export default function Login() {
                   onChange={(e) =>
                     setForm({ ...form, password: e.target.value })
                   }
-                  className="w-full pl-11 pr-4 py-3.5 rounded-xl bg-bg-input border border-white/10 text-text-primary text-sm placeholder:text-text-muted focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20 transition-all"
+                  className="w-full pl-11 pr-4 py-3.5 rounded-xl bg-bg-input border border-border text-text-primary text-sm placeholder:text-text-muted focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20 transition-all"
                   placeholder="••••••••"
                 />
               </div>

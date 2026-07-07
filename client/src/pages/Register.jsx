@@ -82,7 +82,7 @@ export default function Register() {
                 Full Name
               </label>
               <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                
                 <input
                   id="register-name"
                   type="text"
@@ -106,7 +106,7 @@ export default function Register() {
                 Email
               </label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                
                 <input
                   id="register-email"
                   type="email"
@@ -130,7 +130,7 @@ export default function Register() {
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                
                 <input
                   id="register-password"
                   type="password"

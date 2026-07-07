@@ -25,7 +25,7 @@ export default function Profile() {
         updateUser(res.data.data);
       })
       .catch(() => {});
-  }, []);
+  }, [updateUser]);
 
   const memberSince = profile?.createdAt
     ? new Date(profile.createdAt).toLocaleDateString("en-US", {
@@ -76,7 +76,7 @@ export default function Profile() {
       transition={{ duration: 0.4 }}
     >
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-10">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -88,7 +88,7 @@ export default function Profile() {
               Profile
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">
+          <h1 className="text-text-primary">
             Your <span className="gradient-text">Profile</span>
           </h1>
         </motion.div>
@@ -192,7 +192,7 @@ export default function Profile() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 + i * 0.1, duration: 0.5 }}
                 whileHover={{ y: -4 }}
-                className="glass-card p-5 group"
+                className="glass-card p-6 group"
               >
                 <div
                   className={`w-10 h-10 rounded-xl ${stat.bg} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}

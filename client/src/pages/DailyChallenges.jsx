@@ -235,7 +235,7 @@ export default function DailyChallenges() {
   };
 
   const handleMarkComplete = async (problemId) => {
-    setMarkingId(problemId);
+    setMarkingId(String(problemId));
     try {
       const res = await challengeAPI.markComplete(problemId);
       setChallenge(res.data.data.challenge);
@@ -253,9 +253,10 @@ export default function DailyChallenges() {
     fetchChallenge();
   }, []);
 
+  // Normalize all IDs to strings for reliable equality comparison
   const completedIds =
     challenge?.completedProblems?.map((p) =>
-      typeof p === "string" ? p : p._id
+      typeof p === "string" ? p : p._id?.toString() ?? String(p)
     ) || [];
 
   if (loading) {
@@ -273,7 +274,7 @@ export default function DailyChallenges() {
       transition={{ duration: 0.4 }}
     >
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-10">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -285,7 +286,7 @@ export default function DailyChallenges() {
               Daily Challenges
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">
+          <h1 className="text-text-primary">
             Today's <span className="gradient-text">Problems</span>
           </h1>
           <p className="text-sm text-text-secondary mt-1">
@@ -360,9 +361,9 @@ export default function DailyChallenges() {
                     key={problem._id}
                     problem={problem}
                     difficulty={difficulty}
-                    isCompleted={completedIds.includes(problem._id)}
+                    isCompleted={completedIds.includes(String(problem._id))}
                     onMarkComplete={handleMarkComplete}
-                    isMarking={markingId === problem._id}
+                    isMarking={markingId === String(problem._id)}
                   />
                 )
             )}

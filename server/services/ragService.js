@@ -1,6 +1,6 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { RecursiveCharacterTextSplitter } = require("@langchain/textsplitters");
-const { Chroma } = require("@langchain/community/vectorstores/chroma");
+const { MemoryVectorStore } = require("langchain/vectorstores/memory");
 const {
   GoogleGenerativeAIEmbeddings,
 } = require("@langchain/google-genai");
@@ -14,7 +14,7 @@ let initError = null;
 let documentCount = 0;
 
 const KNOWLEDGE_DIR = path.join(__dirname, "..", "knowledge");
-const COLLECTION_NAME = "leetcoach_knowledge";
+const COLLECTION_NAME = "leetcoach_knowledge"; // kept for reference / logging
 
 // ─────────────────────────────────────────────────────────────
 //  1. Document Loader — reads all .txt files from knowledge/
@@ -98,12 +98,14 @@ const getEmbeddings = () => {
 };
 
 // ─────────────────────────────────────────────────────────────
-//  4. ChromaDB Storage — embed & store vectors (in-process)
+//  4. In-Process Vector Store — MemoryVectorStore (no server needed)
+//     Embeds all chunks into an in-memory cosine similarity index.
+//     Rebuilt on each server start from the knowledge/ .txt files.
 // ─────────────────────────────────────────────────────────────
 const initializeVectorStore = async () => {
   if (vectorStore) return vectorStore;
 
-  // Guard against concurrent initialization
+  // Guard against concurrent initialization calls
   if (isInitializing) {
     while (isInitializing) {
       await new Promise((resolve) => setTimeout(resolve, 100));
@@ -116,23 +118,19 @@ const initializeVectorStore = async () => {
   initError = null;
 
   try {
-    console.log("\n🧠 Initializing RAG Knowledge Base...");
+    console.log("\n🧠 Initializing RAG Knowledge Base (in-process)...");
 
     const embeddings = getEmbeddings();
     const documents = loadDocuments();
     const chunks = await splitDocuments(documents);
 
-    // ChromaDB in-process ephemeral store (no external server needed)
-    vectorStore = await Chroma.fromDocuments(chunks, embeddings, {
-      collectionName: COLLECTION_NAME,
-      collectionMetadata: {
-        "hnsw:space": "cosine",
-      },
-    });
+    // MemoryVectorStore — runs fully in-process, zero external dependencies.
+    // Uses cosine similarity for retrieval (same quality as ChromaDB).
+    vectorStore = await MemoryVectorStore.fromDocuments(chunks, embeddings);
 
     documentCount = chunks.length;
     console.log(
-      `   ✅ RAG initialized! ${documentCount} chunks embedded & stored in ChromaDB\n`
+      `   ✅ RAG initialized! ${documentCount} chunks embedded in memory (collection: ${COLLECTION_NAME})\n`
     );
 
     return vectorStore;

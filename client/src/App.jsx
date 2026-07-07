@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { useAuth } from "./context/AuthContext";
 import Layout from "./components/Layout";
@@ -38,9 +38,11 @@ function PublicRoute({ children }) {
 }
 
 export default function App() {
+  const location = useLocation();
+
   return (
     <AnimatePresence mode="wait">
-      <Routes>
+      <Routes location={location} key={location.pathname}>
         {/* Public Routes */}
         <Route
           path="/login"

@@ -104,17 +104,23 @@ function RenderContent({ text }) {
       return;
     }
 
-    if (line.startsWith("## ")) {
+    if (line.startsWith("### ")) {
+      elements.push(
+        <h4 key={i} className="text-sm font-semibold text-text-primary mt-3 mb-1 tracking-tight">
+          {line.slice(4)}
+        </h4>
+      );
+    } else if (line.startsWith("## ")) {
       elements.push(
         <h3 key={i} className="text-base font-semibold text-text-primary mt-4 mb-2 tracking-tight">
           {line.slice(3)}
         </h3>
       );
-    } else if (line.startsWith("### ")) {
+    } else if (line.startsWith("# ")) {
       elements.push(
-        <h4 key={i} className="text-sm font-semibold text-text-primary mt-3 mb-1 tracking-tight">
-          {line.slice(4)}
-        </h4>
+        <h2 key={i} className="text-lg font-bold text-text-primary mt-5 mb-2 tracking-tight">
+          {line.slice(2)}
+        </h2>
       );
     } else if (line.startsWith("- ")) {
       elements.push(
@@ -1174,7 +1180,7 @@ export default function AIFeatures() {
       transition={{ duration: 0.4 }}
     >
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-10">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -1186,7 +1192,7 @@ export default function AIFeatures() {
               AI Study Tools
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">
+          <h1 className="text-text-primary">
             Your AI <span className="gradient-text">Learning Assistant</span>
           </h1>
           <p className="text-sm text-text-secondary mt-1">
@@ -1200,7 +1206,7 @@ export default function AIFeatures() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="glass-card p-1.5 mb-8 flex gap-1"
+        className="glass-card p-1.5 mb-10 flex gap-1"
       >
         {tabs.map((tab) => (
           <button
