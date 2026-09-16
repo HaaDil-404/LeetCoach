@@ -341,28 +341,6 @@ All AI and challenge endpoints require `Authorization: Bearer <token>`.
    - Search the **Knowledge Base** for concept explanations pulled from curated study guides
 5. Track your streak and stats on the **Dashboard** and **Profile** pages
 
----
-
-## Screenshots
-
-> Add screenshots of your running application here.
-
-### Dashboard
-`(screenshot)`
-
-### Daily Challenges
-`(screenshot)`
-
-### AI Tools — Hints
-`(screenshot)`
-
-### AI Tools — Knowledge Base (RAG)
-`(screenshot)`
-
-### Profile
-`(screenshot)`
-
----
 
 ## Troubleshooting
 
